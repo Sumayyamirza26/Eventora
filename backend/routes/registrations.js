@@ -1,12 +1,13 @@
 const express = require('express');
 const Event = require('../models/Event');
 const Registration = require('../models/Registration');
+const { requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
-// GET /api/registrations             -> all registrations
-// GET /api/registrations?event=<id>  -> registrations of one event
-router.get('/', async (req, res) => {
+// GET /api/registrations             -> all registrations (Admin only)
+// GET /api/registrations?event=<id>  -> registrations of one event (Admin only)
+router.get('/', requireAdmin, async (req, res) => {
   const filter = req.query.event ? { event: req.query.event } : {};
   const registrations = await Registration.find(filter)
     .populate('event', 'title')
@@ -43,8 +44,8 @@ router.post('/', async (req, res) => {
   res.status(201).json(registration);
 });
 
-// DELETE /api/registrations/:id
-router.delete('/:id', async (req, res) => {
+// DELETE /api/registrations/:id (Admin only)
+router.delete('/:id', requireAdmin, async (req, res) => {
   const registration = await Registration.findByIdAndDelete(req.params.id);
   if (!registration) return res.status(404).json({ message: 'Registration not found' });
   res.json({ message: 'Registration removed' });

@@ -1,11 +1,12 @@
 const express = require('express');
 const Event = require('../models/Event');
 const Registration = require('../models/Registration');
+const { requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
-// GET /api/events               -> all events
-// GET /api/events?upcoming=true -> only events from today onwards
+// GET /api/events               -> all events (Public)
+// GET /api/events?upcoming=true -> only events from today onwards (Public)
 router.get('/', async (req, res) => {
   const filter = {};
   if (req.query.upcoming === 'true') {
@@ -22,7 +23,7 @@ router.get('/', async (req, res) => {
   res.json(events.map((e) => ({ ...e.toObject(), registered: countMap[e._id.toString()] || 0 })));
 });
 
-// GET /api/events/:id
+// GET /api/events/:id (Public)
 router.get('/:id', async (req, res) => {
   const event = await Event.findById(req.params.id);
   if (!event) return res.status(404).json({ message: 'Event not found' });
@@ -30,14 +31,14 @@ router.get('/:id', async (req, res) => {
   res.json({ ...event.toObject(), registered });
 });
 
-// POST /api/events
-router.post('/', async (req, res) => {
+// POST /api/events (Admin only)
+router.post('/', requireAdmin, async (req, res) => {
   const event = await Event.create(req.body);
   res.status(201).json(event);
 });
 
-// PUT /api/events/:id
-router.put('/:id', async (req, res) => {
+// PUT /api/events/:id (Admin only)
+router.put('/:id', requireAdmin, async (req, res) => {
   const event = await Event.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
@@ -46,8 +47,8 @@ router.put('/:id', async (req, res) => {
   res.json(event);
 });
 
-// DELETE /api/events/:id  (also removes its registrations)
-router.delete('/:id', async (req, res) => {
+// DELETE /api/events/:id  (also removes its registrations) (Admin only)
+router.delete('/:id', requireAdmin, async (req, res) => {
   const event = await Event.findByIdAndDelete(req.params.id);
   if (!event) return res.status(404).json({ message: 'Event not found' });
   await Registration.deleteMany({ event: event._id });
