@@ -1,8 +1,26 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api.js';
 import EventForm from '../components/EventForm.jsx';
+import TicketVerifierModal from '../components/TicketVerifierModal.jsx';
+import EventStatsModal from '../components/EventStatsModal.jsx';
+import CommunicationCenterModal from '../components/CommunicationCenterModal.jsx';
 import { formatDate, categoryColors } from '../utils.js';
 import { useToast } from '../components/Toast.jsx';
+
+// Status badge helper
+function StatusBadge({ status }) {
+  if (!status || status === 'Published') return null;
+  const map = {
+    Draft: 'bg-[#875B18]/15 text-[#875B18] border border-[#875B18]/30',
+    Cancelled: 'bg-[#A34235]/15 text-[#A34235] border border-[#A34235]/30',
+    Completed: 'bg-[#485A99]/15 text-[#485A99] border border-[#485A99]/30',
+  };
+  return (
+    <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${map[status] || 'bg-[#E7E2E9] text-[#625078]'}`}>
+      {status}
+    </span>
+  );
+}
 
 export default function Admin() {
   const [events, setEvents] = useState([]);
@@ -11,12 +29,21 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [formState, setFormState] = useState({ open: false, event: null });
+
+  // New modal states
+  const [showVerifier, setShowVerifier] = useState(false);
+  const [statsEventId, setStatsEventId] = useState(null);   // non-null = modal open
+  const [commsEvent, setCommsEvent] = useState(null);       // non-null = modal open
+
   const { toast } = useToast();
 
   const loadAll = useCallback(async () => {
     setError('');
     try {
-      const [ev, reg] = await Promise.all([api.getEvents(), api.getRegistrations()]);
+      const [ev, reg] = await Promise.all([
+        api.getEvents({ includeDrafts: true }),
+        api.getRegistrations(),
+      ]);
       setEvents(ev);
       setRegistrations(reg);
     } catch (err) {
@@ -73,7 +100,14 @@ export default function Admin() {
     : registrations;
 
   const today = new Date().toISOString().slice(0, 10);
-  const upcomingCount = events.filter((e) => e.date.slice(0, 10) >= today).length;
+
+  // Dashboard metrics
+  const publishedCount = events.filter((e) => !e.status || e.status === 'Published').length;
+  const upcomingCount = events.filter(
+    (e) => e.date?.slice(0, 10) >= today && (!e.status || e.status === 'Published'),
+  ).length;
+  const confirmedCount = registrations.filter((r) => !r.status || r.status === 'Confirmed').length;
+  const waitlistedCount = registrations.filter((r) => r.status === 'Waitlisted').length;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
@@ -86,42 +120,59 @@ export default function Admin() {
             Manage campus events, monitor seat capacities, and view attendee lists.
           </p>
         </div>
-        <button onClick={() => setFormState({ open: true, event: null })} className="btn-primary">
-          <span className="text-base font-bold">＋</span>
-          <span>Add New Event</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* QR Check-in Station */}
+          <button
+            type="button"
+            onClick={() => setShowVerifier(true)}
+            className="inline-flex items-center gap-2 rounded-xl border border-[#292331]/20 bg-[#292331] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#3a3145]"
+          >
+            <span>🎟️</span>
+            <span>QR Check-in Station</span>
+          </button>
+          <button
+            onClick={() => setFormState({ open: true, event: null })}
+            className="btn-primary"
+          >
+            <span className="text-base font-bold">＋</span>
+            <span>Add New Event</span>
+          </button>
+        </div>
       </div>
 
-      {/* Metrics Cards using Eventora Palette Tokens */}
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-[#E7E2E9] bg-white p-6 shadow-sm">
+      {/* Metrics Cards */}
+      <div className="mt-8 grid gap-4 sm:grid-cols-4">
+        <div className="rounded-2xl border border-[#E7E2E9] bg-white p-5 shadow-sm">
           <div className="mb-2 h-1.5 w-10 rounded-full bg-[#292331]" />
           <p className="text-3xl font-extrabold text-[#292331]">{events.length}</p>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#625078] mt-1">Total Events</p>
+          <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-[#625078]">Total Events</p>
         </div>
 
-        <div className="rounded-2xl border border-[#E7E2E9] bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-[#E7E2E9] bg-white p-5 shadow-sm">
           <div className="mb-2 h-1.5 w-10 rounded-full bg-[#625078]" />
           <p className="text-3xl font-extrabold text-[#292331]">{upcomingCount}</p>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#625078] mt-1">Upcoming Events</p>
+          <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-[#625078]">Upcoming Published</p>
         </div>
 
-        <div className="rounded-2xl border border-[#E7E2E9] bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-[#E7E2E9] bg-white p-5 shadow-sm">
           <div className="mb-2 h-1.5 w-10 rounded-full bg-[#356548]" />
-          <p className="text-3xl font-extrabold text-[#292331]">{registrations.length}</p>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#625078] mt-1">Total Registrations</p>
+          <p className="text-3xl font-extrabold text-[#292331]">{confirmedCount}</p>
+          <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-[#625078]">Confirmed Seats</p>
+        </div>
+
+        <div className="rounded-2xl border border-[#E7E2E9] bg-white p-5 shadow-sm">
+          <div className="mb-2 h-1.5 w-10 rounded-full bg-[#875B18]" />
+          <p className="text-3xl font-extrabold text-[#292331]">{waitlistedCount}</p>
+          <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-[#625078]">On Waitlist</p>
         </div>
       </div>
 
       {error && (
         <div className="mt-8 rounded-2xl border border-[#A34235]/30 bg-white p-5 text-[#A34235] shadow-sm">
           <p className="font-bold">Error loading dashboard data</p>
-          <p className="text-sm mt-0.5">{error}</p>
+          <p className="mt-0.5 text-sm">{error}</p>
           <button
-            onClick={() => {
-              setLoading(true);
-              loadAll();
-            }}
+            onClick={() => { setLoading(true); loadAll(); }}
             className="btn-ghost mt-3 text-xs"
           >
             Try again
@@ -131,31 +182,44 @@ export default function Admin() {
 
       {/* Events Section */}
       <section className="mt-12">
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-bold text-[#292331]">All Events</h2>
-          <span className="text-xs text-[#625078] font-medium">{events.length} total events in database</span>
+          <span className="text-xs font-medium text-[#625078]">
+            {events.length} events · {publishedCount} published
+          </span>
         </div>
 
         {loading ? (
           <div className="h-44 animate-pulse rounded-2xl border border-[#E7E2E9] bg-white" />
         ) : events.length === 0 ? (
           <div className="rounded-2xl border border-[#E7E2E9] bg-white p-10 text-center text-[#625078]">
-            No events yet. Click “Add New Event” to create your first campus event.
+            No events yet. Click "Add New Event" to create your first campus event.
           </div>
         ) : (
           <div className="space-y-3.5">
             {events.map((event) => {
-              const isPast = event.date.slice(0, 10) < today;
+              const isPast = event.date?.slice(0, 10) < today;
               const capacity = Number(event.capacity) || 1;
               const registered = Number(event.registered) || 0;
+              const waitlisted = Number(event.waitlisted) || 0;
               const spotsLeft = Math.max(capacity - registered, 0);
               const percentFull = Math.min(Math.round((registered / capacity) * 100), 100);
+              const isCancelled = event.status === 'Cancelled';
+              const isCompleted = event.status === 'Completed';
+              const isDraft = event.status === 'Draft';
 
               return (
                 <div
                   key={event._id}
-                  className="flex flex-col gap-4 rounded-2xl border border-[#E7E2E9] bg-white p-4 sm:p-5 shadow-sm transition hover:border-[#625078]/30 sm:flex-row sm:items-center"
+                  className={`flex flex-col gap-4 rounded-2xl border bg-white p-4 sm:p-5 shadow-sm transition sm:flex-row sm:items-center ${
+                    isCancelled
+                      ? 'border-[#A34235]/20 opacity-75'
+                      : isDraft
+                      ? 'border-[#875B18]/20 bg-[#F7F5F0]'
+                      : 'border-[#E7E2E9] hover:border-[#625078]/30'
+                  }`}
                 >
+                  {/* Thumbnail */}
                   <div className="h-20 w-full shrink-0 overflow-hidden rounded-xl bg-[#292331] sm:w-32">
                     {event.imageUrl ? (
                       <img
@@ -165,15 +229,16 @@ export default function Admin() {
                         onError={(e) => (e.currentTarget.style.display = 'none')}
                       />
                     ) : (
-                      <div className="h-full w-full bg-gradient-to-br from-[#292331] to-[#625078] grid place-items-center text-xs font-bold text-white/50">
+                      <div className="grid h-full w-full place-items-center bg-gradient-to-br from-[#292331] to-[#625078] text-xs font-bold text-white/50">
                         EVENTORA
                       </div>
                     )}
                   </div>
 
+                  {/* Info */}
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="truncate font-bold text-[#292331] text-base">{event.title}</h3>
+                      <h3 className="truncate text-base font-bold text-[#292331]">{event.title}</h3>
                       <span
                         className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                           categoryColors[event.category] || categoryColors.Other
@@ -181,18 +246,29 @@ export default function Admin() {
                       >
                         {event.category}
                       </span>
-                      {isPast ? (
-                        <span className="rounded-full bg-[#E7E2E9] px-2.5 py-0.5 text-xs font-semibold text-[#625078]">
-                          Ended
-                        </span>
-                      ) : spotsLeft === 0 ? (
-                        <span className="rounded-full bg-[#A34235]/15 text-[#A34235] px-2.5 py-0.5 text-xs font-bold">
-                          Sold Out
-                        </span>
-                      ) : (
-                        <span className="rounded-full bg-[#356548]/15 text-[#356548] px-2.5 py-0.5 text-xs font-bold">
-                          Active
-                        </span>
+
+                      {/* Lifecycle status badge */}
+                      <StatusBadge status={event.status} />
+
+                      {/* Capacity / availability badge */}
+                      {!isCancelled && !isDraft && (
+                        isPast || isCompleted ? (
+                          <span className="rounded-full bg-[#E7E2E9] px-2.5 py-0.5 text-xs font-semibold text-[#625078]">
+                            Ended
+                          </span>
+                        ) : spotsLeft === 0 ? (
+                          <span className="rounded-full bg-[#A34235]/15 px-2.5 py-0.5 text-xs font-bold text-[#A34235]">
+                            Sold Out
+                          </span>
+                        ) : spotsLeft <= 5 ? (
+                          <span className="rounded-full bg-[#875B18]/15 px-2.5 py-0.5 text-xs font-bold text-[#875B18]">
+                            Few Left
+                          </span>
+                        ) : (
+                          <span className="rounded-full bg-[#356548]/15 px-2.5 py-0.5 text-xs font-bold text-[#356548]">
+                            Active
+                          </span>
+                        )
                       )}
                     </div>
 
@@ -200,21 +276,34 @@ export default function Admin() {
                       📅 {formatDate(event.date)} &nbsp;·&nbsp; 🕒 {event.time} &nbsp;·&nbsp; 📍 {event.venue}
                     </p>
 
-                    <div className="mt-2 flex items-center gap-3">
-                      <div className="h-1.5 w-32 overflow-hidden rounded-full bg-[#E7E2E9]">
-                        <div
-                          className={`h-full rounded-full ${
-                            spotsLeft === 0 ? 'bg-[#A34235]' : spotsLeft <= 5 ? 'bg-[#875B18]' : 'bg-[#292331]'
-                          }`}
-                          style={{ width: `${percentFull}%` }}
-                        />
+                    {/* Seat progress bar */}
+                    {!isCancelled && (
+                      <div className="mt-2 flex items-center gap-3">
+                        <div className="h-1.5 w-32 overflow-hidden rounded-full bg-[#E7E2E9]">
+                          <div
+                            className={`h-full rounded-full ${
+                              spotsLeft === 0 ? 'bg-[#A34235]' : spotsLeft <= 5 ? 'bg-[#875B18]' : 'bg-[#292331]'
+                            }`}
+                            style={{ width: `${percentFull}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-medium text-[#625078]">
+                          {registered}/{capacity} seats
+                          {waitlisted > 0 && (
+                            <span className="ml-1.5 text-[#875B18]">· {waitlisted} waitlisted</span>
+                          )}
+                        </span>
                       </div>
-                      <span className="text-xs font-medium text-[#625078]">
-                        {registered} / {capacity} seats ({spotsLeft} remaining)
-                      </span>
-                    </div>
+                    )}
+
+                    {isCancelled && event.cancellationReason && (
+                      <p className="mt-1.5 text-xs text-[#A34235]">
+                        ⚠️ {event.cancellationReason}
+                      </p>
+                    )}
                   </div>
 
+                  {/* Action buttons */}
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
@@ -222,6 +311,20 @@ export default function Admin() {
                       className="btn-ghost !px-3.5 !py-2 text-xs"
                     >
                       Attendees ({registered})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStatsEventId(event._id)}
+                      className="btn-ghost !px-3.5 !py-2 text-xs"
+                    >
+                      📊 Stats
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCommsEvent(event)}
+                      className="btn-ghost !px-3.5 !py-2 text-xs"
+                    >
+                      📢 Updates
                     </button>
                     <button
                       type="button"
@@ -245,7 +348,7 @@ export default function Admin() {
         )}
       </section>
 
-      {/* Registered Students Section */}
+      {/* Registered Attendees Section */}
       <section id="students" className="mt-14 scroll-mt-20">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -258,12 +361,12 @@ export default function Admin() {
             <select
               value={filterEvent}
               onChange={(e) => setFilterEvent(e.target.value)}
-              className="input !w-auto min-w-[14rem] text-xs py-2"
+              className="input !w-auto min-w-[14rem] py-2 text-xs"
             >
               <option value="">All Events ({registrations.length})</option>
               {events.map((e) => (
                 <option key={e._id} value={e._id}>
-                  {e.title}
+                  {e.title} {e.status && e.status !== 'Published' ? `[${e.status}]` : ''}
                 </option>
               ))}
             </select>
@@ -271,7 +374,7 @@ export default function Admin() {
         </div>
 
         <div className="overflow-x-auto rounded-2xl border border-[#E7E2E9] bg-white shadow-sm">
-          <table className="w-full min-w-[720px] text-left text-sm">
+          <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="border-b border-[#E7E2E9] bg-[#F7F5F0] text-xs font-bold uppercase tracking-wider text-[#625078]">
               <tr>
                 <th className="px-5 py-3.5">Student</th>
@@ -279,13 +382,16 @@ export default function Admin() {
                 <th className="px-5 py-3.5">Phone</th>
                 <th className="px-5 py-3.5">Dept / Year</th>
                 <th className="px-5 py-3.5">Registered Event</th>
+                <th className="px-5 py-3.5">Status</th>
+                <th className="px-5 py-3.5">Ticket</th>
+                <th className="px-5 py-3.5">Checked In</th>
                 <th className="px-5 py-3.5 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E7E2E9]">
               {visibleRegistrations.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-5 py-12 text-center text-[#625078]">
+                  <td colSpan="9" className="px-5 py-12 text-center text-[#625078]">
                     No student registrations found for this selection.
                   </td>
                 </tr>
@@ -299,6 +405,33 @@ export default function Admin() {
                       {r.department} &nbsp;·&nbsp; <span className="text-xs text-[#625078]">{r.year}</span>
                     </td>
                     <td className="px-5 py-3.5 font-medium text-[#292331]">{r.event?.title || '—'}</td>
+                    <td className="px-5 py-3.5">
+                      {r.status === 'Waitlisted' ? (
+                        <span className="inline-flex items-center rounded-full bg-[#875B18]/15 px-2.5 py-0.5 text-[10px] font-bold text-[#875B18]">
+                          Waitlist {r.waitlistPosition ? `#${r.waitlistPosition}` : ''}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-full bg-[#356548]/15 px-2.5 py-0.5 text-[10px] font-bold text-[#356548]">
+                          Confirmed
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      {r.ticketCode ? (
+                        <span className="font-mono text-[11px] text-[#625078]">{r.ticketCode}</span>
+                      ) : (
+                        <span className="text-xs text-[#E7E2E9]">—</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      {r.checkedIn ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-[#356548]">
+                          ✓ Yes
+                        </span>
+                      ) : (
+                        <span className="text-xs text-[#625078]">No</span>
+                      )}
+                    </td>
                     <td className="px-5 py-3.5 text-right">
                       <button
                         type="button"
@@ -316,9 +449,37 @@ export default function Admin() {
         </div>
       </section>
 
+      {/* ── Modals ── */}
+
       {/* Event Form Modal */}
       {formState.open && (
         <EventForm event={formState.event} onClose={closeForm} onSaved={handleSaved} />
+      )}
+
+      {/* QR Ticket Verifier */}
+      {showVerifier && (
+        <TicketVerifierModal
+          onClose={() => setShowVerifier(false)}
+          onCheckInComplete={loadAll}
+        />
+      )}
+
+      {/* Post-Event Statistics */}
+      {statsEventId && (
+        <EventStatsModal
+          eventId={statsEventId}
+          onClose={() => setStatsEventId(null)}
+        />
+      )}
+
+      {/* Event Communication Centre */}
+      {commsEvent && (
+        <CommunicationCenterModal
+          event={commsEvent}
+          isAdmin={true}
+          onClose={() => setCommsEvent(null)}
+          onUpdated={loadAll}
+        />
       )}
     </div>
   );

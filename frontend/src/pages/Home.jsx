@@ -1,9 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { api } from '../api.js';
+import { Link } from 'react-router-dom';
+import { api, studentStorage } from '../api.js';
 import { CATEGORIES } from '../utils.js';
 import EventCard from '../components/EventCard.jsx';
 import EventModal from '../components/EventModal.jsx';
+import DigitalPass from '../components/DigitalPass.jsx';
+import InterestsModal from '../components/InterestsModal.jsx';
+import CommunicationCenterModal from '../components/CommunicationCenterModal.jsx';
 import { useFavourites } from '../useFavourites.js';
+import { useInterests } from '../useInterests.js';
 import { useToast } from '../components/Toast.jsx';
 
 export default function Home() {
@@ -16,8 +21,17 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  // Favourites
+  // Modals
+  const [showInterestsModal, setShowInterestsModal] = useState(false);
+  const [showCommunication, setShowCommunication] = useState(false);
+  const [ticketLookupOpen, setTicketLookupOpen] = useState(false);
+  const [lookupCode, setLookupCode] = useState('');
+  const [foundRegistration, setFoundRegistration] = useState(null);
+  const [lookupLoading, setLookupLoading] = useState(false);
+
+  // Favourites & Interests
   const { isFavourite, toggleFavourite, favouritesCount } = useFavourites();
+  const { interests, setStudentInterests, hasPreferences } = useInterests();
   const { toast } = useToast();
 
   const loadEvents = useCallback(async () => {
@@ -40,7 +54,7 @@ export default function Home() {
 
   const closeModal = useCallback(() => setSelected(null), []);
 
-  // Update selected modal event when events list refreshes (keeping seat availability live)
+  // Update selected modal event when events list refreshes
   useEffect(() => {
     if (selected) {
       const refreshed = events.find((e) => e._id === selected._id);
@@ -50,12 +64,28 @@ export default function Home() {
 
   const totalRegistered = events.reduce((sum, e) => sum + (Number(e.registered) || 0), 0);
 
-  // Filtered Events: combining Category + Search Query + Favourites
+  // Derive categories from user's favourites for smart fallback recommendations
+  const favouriteCategories = useMemo(() => {
+    const cats = new Set();
+    events.forEach((ev) => {
+      if (isFavourite(ev._id)) cats.add(ev.category);
+    });
+    return Array.from(cats);
+  }, [events, isFavourite]);
+
+  const activeInterests = interests.length > 0 ? interests : favouriteCategories;
+
+  // Filtered & Ranked Events: combining Category + Search Query + Favourites + Personalized Discovery
   const filteredEvents = useMemo(() => {
-    return events.filter((event) => {
-      // 1. Category / Favourites check
+    const filtered = events.filter((event) => {
+      // 1. Category / Favourites / Personalized check
       if (selectedCategory === 'Favourites') {
         if (!isFavourite(event._id)) return false;
+      } else if (selectedCategory === 'ForYou') {
+        // If user has preferences or favourite categories, match them
+        if (activeInterests.length > 0) {
+          if (!activeInterests.includes(event.category)) return false;
+        }
       } else if (selectedCategory !== 'All') {
         if (event.category !== selectedCategory) return false;
       }
@@ -71,7 +101,18 @@ export default function Home() {
 
       return true;
     });
-  }, [events, selectedCategory, searchQuery, isFavourite]);
+
+    // Sort by recommendation relevance if in "For You" mode
+    if (selectedCategory === 'ForYou') {
+      return [...filtered].sort((a, b) => {
+        const aFav = isFavourite(a._id) ? 1 : 0;
+        const bFav = isFavourite(b._id) ? 1 : 0;
+        return bFav - aFav;
+      });
+    }
+
+    return filtered;
+  }, [events, selectedCategory, searchQuery, isFavourite, activeInterests]);
 
   const hasActiveFilters = searchQuery.trim() !== '' || selectedCategory !== 'All';
 
@@ -80,18 +121,37 @@ export default function Home() {
     setSelectedCategory('All');
   };
 
+  const handleLookupPass = async (e) => {
+    e.preventDefault();
+    if (!lookupCode.trim()) {
+      toast.warning('Please enter your ticket pass code');
+      return;
+    }
+
+    setLookupLoading(true);
+    try {
+      const reg = await api.getTicket(lookupCode.trim().toUpperCase());
+      setFoundRegistration(reg);
+      setTicketLookupOpen(false);
+      setLookupCode('');
+    } catch (err) {
+      toast.error(err.message || 'Pass not found. Please check your code.');
+    } finally {
+      setLookupLoading(false);
+    }
+  };
+
   return (
     <>
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-[#292331] text-white">
-        {/* Subtle architectural ambient glows */}
         <div className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-[#625078]/25 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 right-0 h-96 w-96 rounded-full bg-[#D6E59A]/10 blur-3xl pointer-events-none" />
 
         <div className="relative mx-auto max-w-6xl px-4 py-20 text-center sm:py-28 sm:px-6">
           <div className="inline-flex items-center gap-2 rounded-full border border-[#E7E2E9]/20 bg-white/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-white backdrop-blur-md">
             <span className="h-2 w-2 rounded-full bg-[#D6E59A]" />
-            Curated College Events Hub
+            Curated College Events &amp; QR Digital Passes
           </div>
 
           <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-extrabold tracking-tight sm:text-6xl leading-[1.15]">
@@ -99,7 +159,7 @@ export default function Home() {
           </h1>
 
           <p className="mx-auto mt-5 max-w-xl text-base text-[#E7E2E9]/90 sm:text-lg leading-relaxed">
-            Hackathons, cultural fests, technical workshops, and sports meets. Find what's happening and reserve your seat in seconds.
+            Personalized event discovery, real-time waitlists, automated seat allocation, and instant QR digital passes.
           </p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -112,10 +172,33 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </a>
+
+            <Link
+              to={studentStorage.isAuthenticated() ? '/dashboard' : '/student/login'}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#D6E59A] px-5 py-3 font-bold text-[#292331] shadow-lg transition hover:bg-[#c9da88] hover:-translate-y-0.5 active:translate-y-0"
+            >
+              <span>🎓 {studentStorage.isAuthenticated() ? 'My Student Dashboard' : 'Student Portal'}</span>
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => setTicketLookupOpen(true)}
+              className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3 font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
+            >
+              <span>🎟️ Lookup Pass</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowCommunication(true)}
+              className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3 font-semibold text-[#E7E2E9] backdrop-blur-md transition hover:bg-white/20"
+            >
+              <span>📢 Campus Notices</span>
+            </button>
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="mx-auto mt-12 grid max-w-lg grid-cols-3 gap-3 sm:gap-4">
+          <div className="mx-auto mt-12 grid max-w-xl grid-cols-3 gap-3 sm:gap-4">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
               <p className="text-2xl sm:text-3xl font-extrabold text-white">{events.length}</p>
               <p className="text-xs text-[#E7E2E9]/80 mt-1">Active Events</p>
@@ -141,22 +224,36 @@ export default function Home() {
               Campus Calendar
             </span>
             <h2 className="mt-1 text-3xl font-extrabold tracking-tight text-[#292331]">
-              Upcoming Events
+              Upcoming Campus Events
             </h2>
             <p className="mt-1 text-sm text-[#625078]">
-              Browse upcoming campus activities, filter by category, or search by name.
+              Browse scheduled campus activities, personalized recommendations, or search by keywords.
             </p>
           </div>
 
-          {/* Live Count Badge */}
-          {!loading && !error && (
-            <div className="text-xs font-semibold text-[#625078]">
-              Showing <span className="font-bold text-[#292331]">{filteredEvents.length}</span> of {events.length} events
-            </div>
-          )}
+          {/* Live Count & Personalize Action */}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setShowInterestsModal(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#E7E2E9] bg-white px-3 py-1.5 text-xs font-bold text-[#625078] hover:text-[#292331] hover:border-[#625078]/40 shadow-xs transition"
+              title="Personalize recommended events"
+            >
+              <span>⚙️ My Interests</span>
+              {hasPreferences && (
+                <span className="h-2 w-2 rounded-full bg-[#356548]" />
+              )}
+            </button>
+
+            {!loading && !error && (
+              <span className="text-xs font-semibold text-[#625078]">
+                Showing <strong className="text-[#292331]">{filteredEvents.length}</strong> of {events.length} events
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Search Bar & Category Filters (Requirement 1 & 2) */}
+        {/* Search Bar & Category Filters */}
         <div className="mb-8 space-y-4">
           {/* Search Input Container */}
           <div className="relative w-full">
@@ -170,7 +267,7 @@ export default function Home() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search events by event name, venue, or keywords..."
+              placeholder="Search events by event name, venue, description, or keyword..."
               className="w-full rounded-2xl border border-[#E7E2E9] bg-white py-3.5 pl-11 pr-10 text-sm text-[#292331] shadow-sm transition placeholder:text-slate-400 focus:border-[#625078] focus:outline-none focus:ring-2 focus:ring-[#625078]/20"
             />
 
@@ -186,7 +283,7 @@ export default function Home() {
             )}
           </div>
 
-          {/* Category Filter Pills & Favourites Tab */}
+          {/* Category Filter Pills, For You, and Favourites Tab */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               {/* "All" Pill */}
@@ -201,6 +298,29 @@ export default function Home() {
               >
                 {selectedCategory === 'All' && <span className="h-1.5 w-1.5 rounded-full bg-[#D6E59A]" />}
                 All Categories
+              </button>
+
+              {/* "🎯 Recommended For You" Pill (Personalized Event Discovery) */}
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCategory('ForYou');
+                  if (!hasPreferences && favouriteCategories.length === 0) {
+                    setShowInterestsModal(true);
+                  }
+                }}
+                className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-bold transition ${
+                  selectedCategory === 'ForYou'
+                    ? 'border-[#292331] bg-[#292331] text-[#D6E59A] shadow-sm'
+                    : 'border-[#E7E2E9] bg-white text-[#292331] hover:bg-[#F7F5F0]'
+                }`}
+              >
+                <span>🎯 For You</span>
+                {activeInterests.length > 0 && (
+                  <span className="rounded-full bg-[#D6E59A] text-[#292331] px-1.5 py-0.2 text-[10px] font-bold">
+                    {activeInterests.length}
+                  </span>
+                )}
               </button>
 
               {/* Supported Categories */}
@@ -223,7 +343,7 @@ export default function Home() {
                 );
               })}
 
-              {/* "My Favourites" Pill (Requirement 2) */}
+              {/* "My Favourites" Pill */}
               <button
                 type="button"
                 onClick={() => setSelectedCategory('Favourites')}
@@ -308,7 +428,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* Empty State: No events exist in database */}
+        {/* Empty State: No events exist */}
         {!loading && !error && events.length === 0 && (
           <div className="rounded-2xl border border-[#E7E2E9] bg-white p-12 text-center shadow-sm">
             <span className="text-4xl">🗓️</span>
@@ -319,10 +439,36 @@ export default function Home() {
           </div>
         )}
 
-        {/* Empty State: Filter or Search yielded 0 results (Requirement 1 & 2) */}
+        {/* Empty State: Filter or Search yielded 0 results */}
         {!loading && !error && events.length > 0 && filteredEvents.length === 0 && (
           <div className="rounded-2xl border border-[#E7E2E9] bg-white p-12 text-center shadow-sm max-w-lg mx-auto animate-fade-up">
-            {selectedCategory === 'Favourites' ? (
+            {selectedCategory === 'ForYou' ? (
+              <>
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#F7F5F0] text-2xl text-[#625078] border border-[#E7E2E9]">
+                  🎯
+                </div>
+                <h3 className="mt-4 text-lg font-bold text-[#292331]">No personalized matches found</h3>
+                <p className="mt-1.5 text-sm text-[#625078] leading-relaxed">
+                  We couldn't find events matching your active interests ({activeInterests.join(', ') || 'None set'}). Try expanding your preferences!
+                </p>
+                <div className="mt-6 flex justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowInterestsModal(true)}
+                    className="btn-primary"
+                  >
+                    Customize Interests
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCategory('All')}
+                    className="btn-ghost"
+                  >
+                    View All Events
+                  </button>
+                </div>
+              </>
+            ) : selectedCategory === 'Favourites' ? (
               <>
                 <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#F7F5F0] text-2xl text-[#625078] border border-[#E7E2E9]">
                   ⭐
@@ -347,7 +493,7 @@ export default function Home() {
                 <h3 className="mt-4 text-lg font-bold text-[#292331]">No matching events found</h3>
                 <p className="mt-1.5 text-sm text-[#625078] leading-relaxed">
                   We couldn't find any events matching {searchQuery ? `"${searchQuery}"` : ''} in{' '}
-                  <span className="font-semibold text-[#292331]">{selectedCategory}</span>. Try adjusting your search or clear filters.
+                  <span className="font-semibold text-[#292331]">{selectedCategory}</span>.
                 </p>
                 <button
                   type="button"
@@ -364,16 +510,23 @@ export default function Home() {
         {/* Events Grid */}
         {!loading && !error && filteredEvents.length > 0 && (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredEvents.map((event, i) => (
-              <EventCard
-                key={event._id}
-                event={event}
-                index={i}
-                onOpen={setSelected}
-                isFav={isFavourite(event._id)}
-                onToggleFav={toggleFavourite}
-              />
-            ))}
+            {filteredEvents.map((event, i) => {
+              const isRecommended = activeInterests.includes(event.category);
+              const matchReason = isRecommended ? `Matches your ${event.category} interest` : '';
+
+              return (
+                <EventCard
+                  key={event._id}
+                  event={event}
+                  index={i}
+                  onOpen={setSelected}
+                  isFav={isFavourite(event._id)}
+                  onToggleFav={toggleFavourite}
+                  isRecommended={isRecommended}
+                  matchReason={matchReason}
+                />
+              );
+            })}
           </div>
         )}
       </section>
@@ -386,6 +539,85 @@ export default function Home() {
           onRegistered={loadEvents}
           isFav={isFavourite(selected._id)}
           onToggleFav={toggleFavourite}
+        />
+      )}
+
+      {/* Interests Personalization Modal */}
+      {showInterestsModal && (
+        <InterestsModal
+          selectedInterests={interests}
+          onSave={setStudentInterests}
+          onClose={() => setShowInterestsModal(false)}
+        />
+      )}
+
+      {/* Campus Communication Centre Modal */}
+      {showCommunication && (
+        <CommunicationCenterModal
+          event={null}
+          onClose={() => setShowCommunication(false)}
+        />
+      )}
+
+      {/* Ticket Pass Lookup Modal */}
+      {ticketLookupOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#292331]/60 p-4 backdrop-blur-sm"
+          onClick={() => setTicketLookupOpen(false)}
+        >
+          <div
+            className="w-full max-w-md animate-pop overflow-hidden rounded-3xl bg-white p-6 shadow-2xl border border-[#E7E2E9]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-[#E7E2E9] pb-3">
+              <h3 className="font-bold text-base text-[#292331]">Lookup Digital Pass</h3>
+              <button
+                type="button"
+                onClick={() => setTicketLookupOpen(false)}
+                className="text-slate-400 hover:text-[#292331]"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleLookupPass} className="mt-4 space-y-3">
+              <p className="text-xs text-[#625078]">
+                Enter your unique ticket code to retrieve your QR Digital Pass.
+              </p>
+              <input
+                type="text"
+                value={lookupCode}
+                onChange={(e) => setLookupCode(e.target.value.toUpperCase())}
+                placeholder="e.g. EVT-ABCD-1234"
+                className="input font-mono uppercase text-sm"
+                autoFocus
+              />
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setTicketLookupOpen(false)}
+                  className="btn-ghost text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={lookupLoading}
+                  className="btn-primary text-xs !px-5"
+                >
+                  {lookupLoading ? 'Looking up...' : 'Retrieve Pass'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Retrieved Pass Modal */}
+      {foundRegistration && (
+        <DigitalPass
+          registration={foundRegistration}
+          onClose={() => setFoundRegistration(null)}
         />
       )}
     </>

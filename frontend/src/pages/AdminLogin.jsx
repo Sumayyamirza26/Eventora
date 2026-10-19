@@ -46,6 +46,19 @@ export default function AdminLogin() {
     }
   };
 
+  const handleFillDemo = () => {
+    setEmail('admin@eventora.com');
+    setPassword('admin123');
+    toast.info('Demo credentials auto-filled!');
+  };
+
+  const copyToClipboard = (text, label) => {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(text);
+      toast.success(`Copied ${label} to clipboard!`);
+    }
+  };
+
   return (
     <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
       <div className="w-full max-w-md animate-fade-up">
@@ -58,7 +71,7 @@ export default function AdminLogin() {
             </div>
             <h1 className="text-2xl font-bold tracking-tight">Admin Portal</h1>
             <p className="mt-1 text-xs text-[#E7E2E9]/80">
-              Sign in to manage campus events and attendee registrations
+              Sign in to manage campus events, seat allocations, and attendee digital passes
             </p>
           </div>
 
@@ -106,23 +119,23 @@ export default function AdminLogin() {
                     placeholder="Enter password"
                     autoComplete="current-password"
                     required
-                    className="input pr-10"
+                    className="input !pr-11"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                     title={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#625078] hover:text-[#292331] focus:outline-none transition"
+                    className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-[#625078] hover:text-[#292331] focus:outline-none transition"
                   >
                     {showPassword ? (
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                      <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
                       </svg>
                     ) : (
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
                     )}
                   </button>
@@ -146,6 +159,53 @@ export default function AdminLogin() {
                 </button>
               </div>
             </form>
+
+            {/* Demo Admin Credentials Section */}
+            <div className="mt-6 rounded-2xl border border-[#E7E2E9] bg-[#F7F5F0] p-4 text-xs text-[#292331]">
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="flex items-center gap-1.5 font-bold text-[#292331]">
+                  <span className="h-2 w-2 rounded-full bg-[#356548]" />
+                  <span>Demo Admin Credentials</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleFillDemo}
+                  className="inline-flex items-center gap-1 rounded-lg bg-[#D6E59A] px-2.5 py-1 text-[11px] font-bold text-[#292331] shadow-xs hover:bg-[#c9da88] transition"
+                  title="Auto-fill login fields"
+                >
+                  ⚡ Auto-fill
+                </button>
+              </div>
+
+              <div className="space-y-1.5 font-mono text-[11px] text-[#625078]">
+                <div className="flex items-center justify-between rounded-xl bg-white px-3 py-2 border border-[#E7E2E9]">
+                  <span className="truncate">
+                    Email: <strong className="text-[#292331] font-sans">admin@eventora.com</strong>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard('admin@eventora.com', 'email')}
+                    className="ml-2 text-xs text-[#625078] hover:text-[#292331] transition font-sans underline"
+                    title="Copy Email"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <div className="flex items-center justify-between rounded-xl bg-white px-3 py-2 border border-[#E7E2E9]">
+                  <span>
+                    Password: <strong className="text-[#292331] font-sans">admin123</strong>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard('admin123', 'password')}
+                    className="ml-2 text-xs text-[#625078] hover:text-[#292331] transition font-sans underline"
+                    title="Copy Password"
+                  >
+                    Copy
+                  </button>
+                </div>
+              </div>
+            </div>
 
             <div className="mt-6 border-t border-[#E7E2E9] pt-5 text-center">
               <Link

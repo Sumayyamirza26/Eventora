@@ -14,6 +14,8 @@ export default function EventForm({ event, onClose, onSaved }) {
     category: event?.category || 'Tech',
     capacity: event?.capacity || '',
     imageUrl: event?.imageUrl || '',
+    status: event?.status || 'Published',
+    cancellationReason: event?.cancellationReason || '',
   });
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
@@ -44,6 +46,9 @@ export default function EventForm({ event, onClose, onSaved }) {
     if (!form.capacity || Number(form.capacity) < 1) err.capacity = 'Capacity must be at least 1';
     if (form.imageUrl.trim() && !/^https?:\/\//i.test(form.imageUrl.trim())) {
       err.imageUrl = 'Must start with http:// or https://';
+    }
+    if (form.status === 'Cancelled' && !form.cancellationReason.trim()) {
+      err.cancellationReason = 'Cancellation reason is required when marking as Cancelled';
     }
     return err;
   };
@@ -110,7 +115,7 @@ export default function EventForm({ event, onClose, onSaved }) {
         <div className="flex items-center justify-between border-b border-[#E7E2E9] pb-4">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-[#625078]">
-              {event ? 'Modify Record' : 'New Listing'}
+              {event ? 'Lifecycle Management' : 'New Event Listing'}
             </span>
             <h2 className="text-2xl font-extrabold text-[#292331]">{event ? 'Edit Event' : 'Add New Event'}</h2>
           </div>
@@ -160,9 +165,41 @@ export default function EventForm({ event, onClose, onSaved }) {
             </select>
           </div>
 
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#625078]" htmlFor="f-status">
+              Lifecycle Status
+            </label>
+            <select id="f-status" name="status" value={form.status} onChange={handleChange} className="input">
+              <option value="Published">Published (Publicly Visible)</option>
+              <option value="Draft">Draft (Admin Only)</option>
+              <option value="Completed">Completed (Concluded)</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+
           {field('capacity', 'Total Seat Capacity', { input: { type: 'number', min: 1, placeholder: '100' } })}
           {field('imageUrl', 'Cover Image URL (optional)', { input: { placeholder: 'https://images.unsplash.com/…' } })}
         </div>
+
+        {form.status === 'Cancelled' && (
+          <div className="rounded-2xl border border-[#A34235]/30 bg-[#A34235]/10 p-3.5 space-y-1.5 animate-fade-up">
+            <label className="block text-xs font-bold text-[#A34235] uppercase" htmlFor="f-reason">
+              Cancellation Reason (Broadcaster Note)
+            </label>
+            <textarea
+              id="f-reason"
+              name="cancellationReason"
+              rows={2}
+              value={form.cancellationReason}
+              onChange={handleChange}
+              placeholder="Explain why this event is being cancelled..."
+              className="input !border-[#A34235]/40 text-xs"
+            />
+            {errors.cancellationReason && (
+              <p className="text-xs text-[#A34235] font-semibold">{errors.cancellationReason}</p>
+            )}
+          </div>
+        )}
 
         {serverError && (
           <div className="rounded-xl border border-[#A34235]/30 bg-[#A34235]/10 p-3 text-xs font-medium text-[#A34235]">

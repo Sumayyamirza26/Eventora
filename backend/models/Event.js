@@ -14,6 +14,13 @@ const eventSchema = new mongoose.Schema(
     },
     capacity: { type: Number, required: [true, 'Capacity is required'], min: [1, 'Capacity must be at least 1'] },
     imageUrl: { type: String, trim: true, default: '' },
+    status: {
+      type: String,
+      enum: ['Draft', 'Published', 'Completed', 'Cancelled'],
+      default: 'Published',
+    },
+    cancellationReason: { type: String, trim: true, default: '' },
+    tags: [{ type: String, trim: true }],
   },
   { timestamps: true }
 );

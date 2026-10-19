@@ -3,6 +3,8 @@ import Navbar from './components/Navbar.jsx';
 import Home from './pages/Home.jsx';
 import Admin from './pages/Admin.jsx';
 import AdminLogin from './pages/AdminLogin.jsx';
+import StudentAuth from './pages/StudentAuth.jsx';
+import StudentDashboard from './pages/StudentDashboard.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 export default function App() {
@@ -22,6 +24,14 @@ export default function App() {
           />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/login" element={<Navigate to="/admin/login" replace />} />
+
+          {/* Student Portal Routes */}
+          <Route path="/dashboard" element={<StudentDashboard />} />
+          <Route path="/student/dashboard" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/student" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/student/login" element={<StudentAuth />} />
+          <Route path="/student/signup" element={<StudentAuth />} />
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

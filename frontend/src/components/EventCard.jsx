@@ -1,13 +1,24 @@
 import { useState } from 'react';
 import { formatDate, categoryColors } from '../utils.js';
 
-export default function EventCard({ event, index, onOpen, isFav, onToggleFav }) {
+export default function EventCard({
+  event,
+  index,
+  onOpen,
+  isFav,
+  onToggleFav,
+  isRecommended = false,
+  matchReason = '',
+}) {
   const [imgFailed, setImgFailed] = useState(false);
   const capacity = Number(event.capacity) || 1;
   const registered = Number(event.registered) || 0;
+  const waitlisted = Number(event.waitlisted) || 0;
   const spotsLeft = Math.max(capacity - registered, 0);
   const percentFull = Math.min(Math.round((registered / capacity) * 100), 100);
 
+  const isCancelled = event.status === 'Cancelled';
+  const isCompleted = event.status === 'Completed';
   const isSoldOut = spotsLeft === 0;
   const isFewSeats = !isSoldOut && (spotsLeft <= 5 || spotsLeft <= Math.ceil(capacity * 0.15));
 
@@ -33,14 +44,33 @@ export default function EventCard({ event, index, onOpen, isFav, onToggleFav }) 
           </div>
         )}
 
-        {/* Category Badge */}
-        <span
-          className={`absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-md shadow-sm ${
-            categoryColors[event.category] || categoryColors.Other
-          }`}
-        >
-          {event.category}
-        </span>
+        {/* Category & Recommended Badges */}
+        <div className="absolute left-3 top-3 flex flex-col gap-1.5 items-start">
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-md shadow-sm ${
+              categoryColors[event.category] || categoryColors.Other
+            }`}
+          >
+            {event.category}
+          </span>
+
+          {isRecommended && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#D6E59A] px-2.5 py-0.5 text-[10px] font-bold text-[#292331] shadow-md backdrop-blur">
+              <span>✦</span> For You
+            </span>
+          )}
+
+          {isCancelled && (
+            <span className="rounded-full bg-[#A34235] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+              Cancelled
+            </span>
+          )}
+          {isCompleted && (
+            <span className="rounded-full bg-[#625078] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+              Concluded
+            </span>
+          )}
+        </div>
 
         {/* Right Badges: Date & Favourite Bookmark */}
         <div className="absolute right-3 top-3 flex items-center gap-1.5">
@@ -77,10 +107,10 @@ export default function EventCard({ event, index, onOpen, isFav, onToggleFav }) 
         </div>
 
         {/* Sold out overlay banner if completely full */}
-        {isSoldOut && (
+        {isSoldOut && !isCancelled && !isCompleted && (
           <div className="absolute inset-0 bg-[#292331]/50 backdrop-blur-[2px] flex items-center justify-center pointer-events-none">
             <span className="rounded-full bg-[#A34235] px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-md">
-              Sold Out
+              Sold Out · Waitlist Open
             </span>
           </div>
         )}
@@ -94,7 +124,14 @@ export default function EventCard({ event, index, onOpen, isFav, onToggleFav }) 
         <p className="mt-1 text-xs font-medium text-[#625078]">
           🕒 {event.time} &nbsp;·&nbsp; 📍 {event.venue}
         </p>
-        <p className="mt-2.5 line-clamp-2 text-sm text-[#292331]/80 leading-relaxed">
+
+        {isRecommended && matchReason && (
+          <p className="mt-1 text-[11px] font-semibold text-[#625078]">
+            🎯 {matchReason}
+          </p>
+        )}
+
+        <p className="mt-2 line-clamp-2 text-sm text-[#292331]/80 leading-relaxed">
           {event.description}
         </p>
 
@@ -105,9 +142,9 @@ export default function EventCard({ event, index, onOpen, isFav, onToggleFav }) 
               {registered} of {capacity} seats filled ({percentFull}%)
             </span>
             {isSoldOut ? (
-              <span className="inline-flex items-center gap-1 font-bold text-[#A34235]">
-                <span className="h-2 w-2 rounded-full bg-[#A34235]" />
-                Sold Out
+              <span className="inline-flex items-center gap-1 font-bold text-[#875B18]">
+                <span className="h-2 w-2 rounded-full bg-[#875B18]" />
+                Waitlist ({waitlisted})
               </span>
             ) : isFewSeats ? (
               <span className="inline-flex items-center gap-1 font-bold text-[#875B18]">
@@ -126,7 +163,7 @@ export default function EventCard({ event, index, onOpen, isFav, onToggleFav }) 
             <div
               className={`h-full rounded-full transition-all duration-500 ${
                 isSoldOut
-                  ? 'bg-[#A34235]'
+                  ? 'bg-[#875B18]'
                   : isFewSeats
                   ? 'bg-[#875B18]'
                   : 'bg-[#292331]'
@@ -142,13 +179,29 @@ export default function EventCard({ event, index, onOpen, isFav, onToggleFav }) 
 
         {/* Action Button */}
         <div className="mt-5">
-          {isSoldOut ? (
+          {isCancelled ? (
             <button
               type="button"
               onClick={() => onOpen(event)}
               className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#A34235]/40 bg-[#A34235]/5 px-4 py-2.5 text-sm font-semibold text-[#A34235] transition hover:bg-[#A34235]/10"
             >
-              <span>Sold Out · View Details</span>
+              <span>Cancelled · View Notice</span>
+            </button>
+          ) : isCompleted ? (
+            <button
+              type="button"
+              onClick={() => onOpen(event)}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#E7E2E9] bg-[#F7F5F0] px-4 py-2.5 text-sm font-semibold text-[#625078] transition hover:bg-slate-100"
+            >
+              <span>Concluded · View Details</span>
+            </button>
+          ) : isSoldOut ? (
+            <button
+              type="button"
+              onClick={() => onOpen(event)}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#875B18]/40 bg-[#875B18]/10 px-4 py-2.5 text-sm font-bold text-[#875B18] transition hover:bg-[#875B18]/20"
+            >
+              <span>Sold Out · Join Waitlist</span>
             </button>
           ) : (
             <button
