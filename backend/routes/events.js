@@ -13,6 +13,16 @@ router.get('/', async (req, res) => {
     const todayUTC = new Date(new Date().toISOString().slice(0, 10));
     filter.date = { $gte: todayUTC };
   }
+  if (req.query.category && req.query.category !== 'All') {
+    filter.category = req.query.category;
+  }
+  if (req.query.search && req.query.search.trim()) {
+    filter.$or = [
+      { title: { $regex: req.query.search.trim(), $options: 'i' } },
+      { description: { $regex: req.query.search.trim(), $options: 'i' } },
+      { venue: { $regex: req.query.search.trim(), $options: 'i' } },
+    ];
+  }
   const events = await Event.find(filter).sort({ date: 1 });
 
   // Count registrations for each event

@@ -8,12 +8,29 @@ A full-stack web application for college campuses to manage events, track capaci
 
 ## ✨ Features
 
-- Browse upcoming events with category badges, venue, schedule & real-time seat availability
-- One-click student registration with duplicate & capacity validation
-- Secure admin login with JWT authentication & bcrypt password hashing
-- Protected admin dashboard to create, edit, delete events and manage registrations
-- Auto-provisioned admin account from environment variables on first startup
-- Sample data seeder to populate events across Tech, Cultural, Sports & Workshops
+- **Search & Category Filters**: Search events in real-time by title or keyword and filter across Tech, Cultural, Sports, Workshop, Career, and Other categories with quick clear-filter actions.
+- **Save to Favourites**: Bookmark events directly from event cards or details popups, persisted locally with a dedicated "My Favourites" view.
+- **Registration Confirmation**: Polished post-registration confirmation panel displaying event title, date/time, venue, and attendee confirmation details.
+- **Visual Seat Availability**: Real-time capacity tracker showing seats filled, seats remaining, percentage progress bar, "Few Seats Left" warnings, and "Sold Out" states.
+- **Concurrency-Safe Registrations**: Backend validation with atomic/transaction checks to prevent duplicate entries and overbooking beyond event capacity.
+- **Toast Notifications**: Reusable, consistent feedback system for actions, favourites, form validation, and admin operations.
+- **Secure Admin Portal**: Protected dashboard for event CRUD and attendee management, featuring empty-by-default login fields, clear placeholders, and a show/hide password toggle.
+- **Curated Brand Palette**: Built with the official Eventora design tokens — Deep Plum (`#292331`), Warm Porcelain (`#F7F5F0`), Pure White (`#FFFFFF`), Muted Violet (`#625078`), Soft Citron (`#D6E59A`), and Misty Lilac (`#E7E2E9`).
+
+---
+
+## 🎨 Brand Colour Palette
+
+| Token | Hex | Role |
+| :--- | :--- | :--- |
+| **Deep Plum** | `#292331` | Primary brand colour, navigation, headings, primary buttons |
+| **Warm Porcelain** | `#F7F5F0` | Main application background |
+| **Pure White** | `#FFFFFF` | Event cards, dialog surfaces, form containers |
+| **Muted Violet** | `#625078` | Secondary actions, selected category filters, subtle text |
+| **Soft Citron** | `#D6E59A` | Small highlights, active indicators, and favourite accents |
+| **Misty Lilac** | `#E7E2E9` | Borders, dividers, and progress bar backgrounds |
+
+Functional status colors: **Success** (`#356548`), **Warning** (`#875B18`), **Error** (`#A34235`), and **Info** (`#485A99`).
 
 ---
 
@@ -41,8 +58,9 @@ eventora/
 │   └── .env              # Environment variables (not committed)
 ├── frontend/
 │   ├── src/
-│   │   ├── components/   # Navbar, EventCard, EventForm, EventModal, ProtectedRoute
+│   │   ├── components/   # Navbar, EventCard, EventForm, EventModal, ProtectedRoute, Toast
 │   │   ├── pages/        # Home, Admin, AdminLogin
+│   │   ├── useFavourites.js # Persistent favourites hook
 │   │   ├── api.js        # API client & auth helpers
 │   │   ├── App.jsx       # Root component with routing
 │   │   └── main.jsx      # Entry point
@@ -124,7 +142,6 @@ Open [http://localhost:5173](http://localhost:5173) and visit `/admin/login` to 
 ## 🔮 Future Improvements
 
 - Email confirmation on registration
-- Event search & category filters
 - Student login & registration history
 - Export registrations to CSV
 - Dark mode support

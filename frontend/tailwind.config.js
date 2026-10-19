@@ -4,6 +4,20 @@ export default {
   theme: {
     extend: {
       fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+      colors: {
+        eventora: {
+          plum: '#292331',
+          porcelain: '#F7F5F0',
+          white: '#FFFFFF',
+          violet: '#625078',
+          citron: '#D6E59A',
+          lilac: '#E7E2E9',
+          success: '#356548',
+          warning: '#875B18',
+          error: '#A34235',
+          info: '#485A99',
+        },
+      },
       keyframes: {
         fadeUp: {
           '0%': { opacity: '0', transform: 'translateY(18px)' },

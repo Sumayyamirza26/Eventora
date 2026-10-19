@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { CATEGORIES, toInputDate } from '../utils.js';
+import { useToast } from './Toast.jsx';
 
-// Used by the admin page for both "Add event" (event = null) and "Edit event"
 export default function EventForm({ event, onClose, onSaved }) {
+  const { toast } = useToast();
   const [form, setForm] = useState({
     title: event?.title || '',
     description: event?.description || '',
@@ -37,11 +38,13 @@ export default function EventForm({ event, onClose, onSaved }) {
     const err = {};
     if (!form.title.trim()) err.title = 'Title is required';
     if (!form.description.trim()) err.description = 'Description is required';
-    if (!form.date) err.date = 'Pick a date';
+    if (!form.date) err.date = 'Pick an event date';
     if (!form.time.trim()) err.time = 'Enter a time, e.g. 10:00 AM';
     if (!form.venue.trim()) err.venue = 'Venue is required';
     if (!form.capacity || Number(form.capacity) < 1) err.capacity = 'Capacity must be at least 1';
-    if (form.imageUrl.trim() && !/^https?:\/\//i.test(form.imageUrl.trim())) err.imageUrl = 'Must start with http:// or https://';
+    if (form.imageUrl.trim() && !/^https?:\/\//i.test(form.imageUrl.trim())) {
+      err.imageUrl = 'Must start with http:// or https://';
+    }
     return err;
   };
 
@@ -50,16 +53,25 @@ export default function EventForm({ event, onClose, onSaved }) {
     setServerError('');
     const found = validate();
     setErrors(found);
-    if (Object.keys(found).length > 0) return;
+    if (Object.keys(found).length > 0) {
+      toast.warning('Please fix the errors in the event form.');
+      return;
+    }
 
     setSaving(true);
     try {
       const body = { ...form, capacity: Number(form.capacity) };
-      if (event) await api.updateEvent(event._id, body);
-      else await api.createEvent(body);
-      onSaved(event ? 'Event updated' : 'Event added');
+      if (event) {
+        await api.updateEvent(event._id, body);
+        onSaved('Event updated successfully');
+      } else {
+        await api.createEvent(body);
+        onSaved('Event created successfully');
+      }
     } catch (err) {
-      setServerError(err.message);
+      const msg = err.message || 'Failed to save event';
+      setServerError(msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -67,55 +79,103 @@ export default function EventForm({ event, onClose, onSaved }) {
 
   const field = (name, label, props = {}) => (
     <div className={props.wrapper || ''}>
-      <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor={`f-${name}`}>{label}</label>
-      <input id={`f-${name}`} name={name} value={form[name]} onChange={handleChange}
-        className={`input ${errors[name] ? 'input-error' : ''}`} {...props.input} />
-      {errors[name] && <p className="mt-1 text-xs text-red-600">{errors[name]}</p>}
+      <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#625078]" htmlFor={`f-${name}`}>
+        {label}
+      </label>
+      <input
+        id={`f-${name}`}
+        name={name}
+        value={form[name]}
+        onChange={handleChange}
+        className={`input ${errors[name] ? 'input-error' : ''}`}
+        {...props.input}
+      />
+      {errors[name] && <p className="mt-1 text-xs text-[#A34235]">{errors[name]}</p>}
     </div>
   );
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-40 flex items-center justify-center bg-[#292331]/60 p-4 backdrop-blur-sm"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
       <form
         onSubmit={handleSubmit}
         noValidate
         onClick={(e) => e.stopPropagation()}
-        className="max-h-[92vh] w-full max-w-2xl animate-pop space-y-4 overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl sm:p-8"
+        className="max-h-[92vh] w-full max-w-2xl animate-pop space-y-4 overflow-y-auto rounded-3xl bg-white p-6 sm:p-8 shadow-2xl border border-[#E7E2E9]"
       >
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-extrabold text-slate-900">{event ? 'Edit Event' : 'Add New Event'}</h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="text-xl text-slate-400 hover:text-slate-700">✕</button>
+        <div className="flex items-center justify-between border-b border-[#E7E2E9] pb-4">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-[#625078]">
+              {event ? 'Modify Record' : 'New Listing'}
+            </span>
+            <h2 className="text-2xl font-extrabold text-[#292331]">{event ? 'Edit Event' : 'Add New Event'}</h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close dialog"
+            className="grid h-8 w-8 place-items-center rounded-xl text-slate-400 hover:bg-[#F7F5F0] hover:text-[#292331] transition"
+          >
+            ✕
+          </button>
         </div>
 
-        {field('title', 'Title', { input: { placeholder: 'Event title' } })}
+        {field('title', 'Event Title', { input: { placeholder: 'CodeStorm Hackathon 2026' } })}
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="f-description">Description</label>
-          <textarea id="f-description" name="description" rows={3} value={form.description} onChange={handleChange}
-            className={`input ${errors.description ? 'input-error' : ''}`} placeholder="What is this event about?" />
-          {errors.description && <p className="mt-1 text-xs text-red-600">{errors.description}</p>}
+          <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#625078]" htmlFor="f-description">
+            Event Description
+          </label>
+          <textarea
+            id="f-description"
+            name="description"
+            rows={3}
+            value={form.description}
+            onChange={handleChange}
+            className={`input ${errors.description ? 'input-error' : ''}`}
+            placeholder="What is this event about? Detail agenda, speaker info, snacks, prizes..."
+          />
+          {errors.description && <p className="mt-1 text-xs text-[#A34235]">{errors.description}</p>}
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          {field('date', 'Date', { input: { type: 'date' } })}
-          {field('time', 'Time', { input: { placeholder: '10:00 AM' } })}
-          {field('venue', 'Venue', { input: { placeholder: 'Main Auditorium' } })}
+          {field('date', 'Event Date', { input: { type: 'date' } })}
+          {field('time', 'Scheduled Time', { input: { placeholder: '10:00 AM' } })}
+          {field('venue', 'Campus Venue', { input: { placeholder: 'Main Auditorium, Block C' } })}
+
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="f-category">Category</label>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#625078]" htmlFor="f-category">
+              Category
+            </label>
             <select id="f-category" name="category" value={form.category} onChange={handleChange} className="input">
-              {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
             </select>
           </div>
-          {field('capacity', 'Capacity (seats)', { input: { type: 'number', min: 1, placeholder: '100' } })}
-          {field('imageUrl', 'Image URL (optional)', { input: { placeholder: 'https://…' } })}
+
+          {field('capacity', 'Total Seat Capacity', { input: { type: 'number', min: 1, placeholder: '100' } })}
+          {field('imageUrl', 'Cover Image URL (optional)', { input: { placeholder: 'https://images.unsplash.com/…' } })}
         </div>
 
-        {serverError && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{serverError}</p>}
+        {serverError && (
+          <div className="rounded-xl border border-[#A34235]/30 bg-[#A34235]/10 p-3 text-xs font-medium text-[#A34235]">
+            {serverError}
+          </div>
+        )}
 
-        <div className="flex justify-end gap-3 pt-2">
-          <button type="button" onClick={onClose} className="btn-ghost">Cancel</button>
+        <div className="flex justify-end gap-3 pt-3 border-t border-[#E7E2E9]">
+          <button type="button" onClick={onClose} className="btn-ghost">
+            Cancel
+          </button>
           <button type="submit" disabled={saving} className="btn-primary">
-            {saving ? 'Saving…' : event ? 'Save Changes' : 'Add Event'}
+            {saving ? 'Saving...' : event ? 'Save Changes' : 'Create Event'}
           </button>
         </div>
       </form>

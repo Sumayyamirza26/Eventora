@@ -128,8 +128,17 @@ export const api = {
   getBaseUrl: resolveApiBaseUrl,
 
   // Events
-  getEvents: (upcomingOnly = false) =>
-    request(`/events${upcomingOnly ? '?upcoming=true' : ''}`),
+  getEvents: (options = false) => {
+    if (typeof options === 'boolean') {
+      return request(`/events${options ? '?upcoming=true' : ''}`);
+    }
+    const params = new URLSearchParams();
+    if (options.upcoming) params.append('upcoming', 'true');
+    if (options.category && options.category !== 'All') params.append('category', options.category);
+    if (options.search && options.search.trim()) params.append('search', options.search.trim());
+    const qs = params.toString();
+    return request(`/events${qs ? `?${qs}` : ''}`);
+  },
 
   getEvent: (id) => request(`/events/${id}`),
 
