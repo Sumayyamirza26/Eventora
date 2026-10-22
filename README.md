@@ -188,14 +188,6 @@ Open [http://localhost:5173](http://localhost:5173):
 
 ---
 
-## 🔮 Future Improvements
-
-- Email/SMS confirmation notifications via SendGrid/Twilio
-- Export attendee & registration rosters to CSV/Excel
-- Dark mode support
-
----
-
 ## 👩‍💻 Author
 
 **Sumayya Mirza**
