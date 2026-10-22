@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Check, Target, X } from 'lucide-react';
 import { CATEGORIES } from '../utils.js';
 
 export default function InterestsModal({ selectedInterests, onSave, onClose }) {
@@ -29,7 +30,7 @@ export default function InterestsModal({ selectedInterests, onSave, onClose }) {
         <div className="flex items-center justify-between border-b border-[#E7E2E9] pb-4">
           <div className="flex items-center gap-2">
             <span className="grid h-8 w-8 place-items-center rounded-xl bg-[#D6E59A] text-sm font-bold text-[#292331]">
-              🎯
+              <Target className="h-4 w-4 text-[#292331]" />
             </span>
             <div>
               <h3 className="font-bold text-base text-[#292331]">Your Campus Interests</h3>
@@ -39,9 +40,10 @@ export default function InterestsModal({ selectedInterests, onSave, onClose }) {
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close dialog"
             className="grid h-7 w-7 place-items-center rounded-lg text-slate-400 hover:bg-[#F7F5F0] hover:text-[#292331] transition"
           >
-            ✕
+            <X className="h-4 w-4" />
           </button>
         </div>
 
@@ -69,7 +71,7 @@ export default function InterestsModal({ selectedInterests, onSave, onClose }) {
                     isChecked ? 'bg-[#D6E59A] text-[#292331]' : 'border border-[#E7E2E9] bg-[#F7F5F0]'
                   }`}
                 >
-                  {isChecked ? '✓' : ''}
+                  {isChecked ? <Check className="h-3 w-3 stroke-[3]" /> : null}
                 </span>
               </button>
             );

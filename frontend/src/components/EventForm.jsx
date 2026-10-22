@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { X } from 'lucide-react';
 import { api } from '../api.js';
 import { CATEGORIES, toInputDate } from '../utils.js';
 import { useToast } from './Toast.jsx';
@@ -125,7 +126,7 @@ export default function EventForm({ event, onClose, onSaved }) {
             aria-label="Close dialog"
             className="grid h-8 w-8 place-items-center rounded-xl text-slate-400 hover:bg-[#F7F5F0] hover:text-[#292331] transition"
           >
-            ✕
+            <X className="h-4 w-4" />
           </button>
         </div>
 

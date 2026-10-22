@@ -1,4 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
+import {
+  AlertTriangle,
+  BarChart3,
+  Calendar,
+  Check,
+  Clock,
+  MapPin,
+  Megaphone,
+  Plus,
+  Ticket,
+} from 'lucide-react';
 import { api } from '../api.js';
 import EventForm from '../components/EventForm.jsx';
 import TicketVerifierModal from '../components/TicketVerifierModal.jsx';
@@ -127,14 +138,14 @@ export default function Admin() {
             onClick={() => setShowVerifier(true)}
             className="inline-flex items-center gap-2 rounded-xl border border-[#292331]/20 bg-[#292331] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#3a3145]"
           >
-            <span>🎟️</span>
+            <Ticket className="h-4 w-4" />
             <span>QR Check-in Station</span>
           </button>
           <button
             onClick={() => setFormState({ open: true, event: null })}
             className="btn-primary"
           >
-            <span className="text-base font-bold">＋</span>
+            <Plus className="h-4 w-4" />
             <span>Add New Event</span>
           </button>
         </div>
@@ -272,8 +283,15 @@ export default function Admin() {
                       )}
                     </div>
 
-                    <p className="mt-1 text-xs text-[#625078]">
-                      📅 {formatDate(event.date)} &nbsp;·&nbsp; 🕒 {event.time} &nbsp;·&nbsp; 📍 {event.venue}
+                    <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-[#625078]">
+                      <Calendar className="h-3.5 w-3.5 inline shrink-0" />
+                      <span>{formatDate(event.date)}</span>
+                      <span>·</span>
+                      <Clock className="h-3.5 w-3.5 inline shrink-0" />
+                      <span>{event.time}</span>
+                      <span>·</span>
+                      <MapPin className="h-3.5 w-3.5 inline shrink-0" />
+                      <span>{event.venue}</span>
                     </p>
 
                     {/* Seat progress bar */}
@@ -297,8 +315,9 @@ export default function Admin() {
                     )}
 
                     {isCancelled && event.cancellationReason && (
-                      <p className="mt-1.5 text-xs text-[#A34235]">
-                        ⚠️ {event.cancellationReason}
+                      <p className="mt-1.5 flex items-center gap-1 text-xs text-[#A34235]">
+                        <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                        <span>{event.cancellationReason}</span>
                       </p>
                     )}
                   </div>
@@ -315,16 +334,18 @@ export default function Admin() {
                     <button
                       type="button"
                       onClick={() => setStatsEventId(event._id)}
-                      className="btn-ghost !px-3.5 !py-2 text-xs"
+                      className="btn-ghost !px-3.5 !py-2 text-xs inline-flex items-center gap-1.5"
                     >
-                      📊 Stats
+                      <BarChart3 className="h-3.5 w-3.5" />
+                      <span>Stats</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setCommsEvent(event)}
-                      className="btn-ghost !px-3.5 !py-2 text-xs"
+                      className="btn-ghost !px-3.5 !py-2 text-xs inline-flex items-center gap-1.5"
                     >
-                      📢 Updates
+                      <Megaphone className="h-3.5 w-3.5" />
+                      <span>Updates</span>
                     </button>
                     <button
                       type="button"
@@ -426,7 +447,8 @@ export default function Admin() {
                     <td className="px-5 py-3.5">
                       {r.checkedIn ? (
                         <span className="inline-flex items-center gap-1 text-xs font-bold text-[#356548]">
-                          ✓ Yes
+                          <Check className="h-3.5 w-3.5 stroke-[2.5]" />
+                          <span>Yes</span>
                         </span>
                       ) : (
                         <span className="text-xs text-[#625078]">No</span>

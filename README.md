@@ -9,7 +9,7 @@ A full-stack web application for college campuses to manage events, track capaci
 ## ✨ Features
 
 ### 🎓 Student Portal & Lifecycle Experience
-- **Student Signup & Login**: Secure student authentication with bcrypt password hashing, JWT sessions, and personal student account registration.
+- **Student Signup & Login**: Secure student authentication with bcrypt password hashing, JWT sessions, toggleable password visibility, and personal student account registration.
 - **Student Dashboard**: Overview with personal Student Profile card, registered event metrics, confirmed seat count, and certificates earned.
 - **My Registered Events**: View all events you have registered for with real-time status badges (`Confirmed`, `Waitlist #N`, `Checked In`, `Cancelled`).
 - **Search & Filter Registered Events**: Filter registered events by status or search in real time by title, venue, or ticket code.
@@ -20,6 +20,8 @@ A full-stack web application for college campuses to manage events, track capaci
 - **QR Digital Passes**: Scannable digital pass generated for every registration with unique Student Pass ID (`STU-XXXX-XXXX`), unique Ticket Code (`EVT-XXXX-XXXX`), attendee info, and entrance verification.
 
 ### 🏛️ Campus Event Management & Administration
+- **Immersive Hero Section**: Auditorium background cover with a subtle dark brand overlay, responsive across desktop, tablet, and mobile.
+- **Branded Design & Iconography**: Official Eventora horizontal logo in navbar, square icon mark across portal headers, custom favicons, and consistent Lucide React icons throughout.
 - **Search & Category Filters**: Search campus events in real-time by title or keyword and filter across Tech, Cultural, Sports, Workshop, Career, and Other categories.
 - **Save to Favourites**: Bookmark events directly from event cards or details popups, persisted locally with a dedicated "My Favourites" view.
 - **Registration Confirmation**: Polished post-registration confirmation panel displaying event title, date/time, venue, unique Ticket Code, and Student Pass ID.
@@ -53,7 +55,7 @@ Functional status colors: **Success** (`#356548`), **Warning** (`#875B18`), **Er
 
 | Layer | Technologies |
 | :--- | :--- |
-| **Frontend** | React 18, React Router v6, Tailwind CSS, Vite, jsPDF, qrcode |
+| **Frontend** | React 18, React Router v6, Tailwind CSS, Vite, Lucide React, jsPDF, qrcode |
 | **Backend** | Node.js, Express 5, Mongoose, JWT, bcryptjs |
 | **Database** | MongoDB Atlas / Local MongoDB |
 
@@ -67,11 +69,12 @@ eventora/
 │   ├── middleware/       # JWT auth middleware (requireAdmin, requireStudent, optionalAuth)
 │   ├── models/           # Mongoose schemas (Event, Registration, Admin, Announcement, Student, Notification)
 │   ├── routes/           # Express route handlers (auth, events, registrations, announcements, students)
-│   ├── utils/            # Admin & demo student seed utilities
+│   ├── utils/            # Admin seeding and ID generator utilities
 │   ├── server.js         # App entry point & route mounting
 │   ├── seed.js           # Sample data seeder
 │   └── .env              # Environment variables (not committed)
 ├── frontend/
+│   ├── public/           # Brand logos, icons, favicons, hero background image
 │   ├── src/
 │   │   ├── components/   # Navbar, EventCard, EventForm, EventModal, ProtectedRoute, Toast,
 │   │   │                 # DigitalPass, InterestsModal, CommunicationCenterModal,
@@ -138,8 +141,8 @@ npm run dev    # starts app on http://localhost:5173
 ```
 
 Open [http://localhost:5173](http://localhost:5173):
-- Visit `/student/login` for the student portal (Demo: `student@college.edu` / `student123`).
-- Visit `/admin/login` for the admin portal (Demo: `admin@eventora.com` / `admin123`).
+- Visit `/student/login` for the student portal (register with your details, or sign in).
+- Visit `/admin/login` for the admin portal (Default: `admin@eventora.com` / `admin123`).
 
 ---
 

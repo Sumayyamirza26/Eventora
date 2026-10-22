@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link, Navigate } from 'react-router-dom';
+import { Zap } from 'lucide-react';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 
@@ -65,9 +66,8 @@ export default function AdminLogin() {
         <div className="overflow-hidden rounded-3xl bg-white shadow-xl border border-[#E7E2E9]">
           {/* Header */}
           <div className="bg-[#292331] px-8 py-8 text-center text-white relative">
-            <div className="relative mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-white/10 text-2xl font-black backdrop-blur">
-              E
-              <span className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-[#D6E59A] ring-2 ring-[#292331]" />
+            <div className="relative mx-auto mb-3 h-14 w-14 overflow-hidden rounded-2xl bg-white/10 p-1.5 shadow-md backdrop-blur">
+              <img src="/eventora-icon.png" alt="Eventora" className="h-full w-full object-contain rounded-xl" />
             </div>
             <h1 className="text-2xl font-bold tracking-tight">Admin Portal</h1>
             <p className="mt-1 text-xs text-[#E7E2E9]/80">
@@ -170,10 +170,11 @@ export default function AdminLogin() {
                 <button
                   type="button"
                   onClick={handleFillDemo}
-                  className="inline-flex items-center gap-1 rounded-lg bg-[#D6E59A] px-2.5 py-1 text-[11px] font-bold text-[#292331] shadow-xs hover:bg-[#c9da88] transition"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#D6E59A] px-2.5 py-1 text-[11px] font-bold text-[#292331] shadow-xs hover:bg-[#c9da88] transition"
                   title="Auto-fill login fields"
                 >
-                  ⚡ Auto-fill
+                  <Zap className="h-3 w-3 fill-current" />
+                  <span>Auto-fill</span>
                 </button>
               </div>
 

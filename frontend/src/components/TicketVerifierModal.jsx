@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Check, CheckCircle2, X } from 'lucide-react';
 import { api } from '../api.js';
 import { useToast } from './Toast.jsx';
 import { formatDate } from '../utils.js';
@@ -99,7 +100,7 @@ export default function TicketVerifierModal({ onClose, onCheckInComplete }) {
             className="grid h-7 w-7 place-items-center rounded-lg text-slate-400 hover:bg-[#F7F5F0] hover:text-[#292331] transition"
             aria-label="Close verifier"
           >
-            ✕
+            <X className="h-4 w-4" />
           </button>
         </div>
 
@@ -165,11 +166,16 @@ export default function TicketVerifierModal({ onClose, onCheckInComplete }) {
                     : 'bg-[#D6E59A] text-[#292331]'
                 }`}
               >
-                {lookupResult.checkedIn
-                  ? '✓ Checked In'
-                  : lookupResult.status === 'Waitlisted'
-                  ? `Waitlist #${lookupResult.waitlistPosition}`
-                  : 'Confirmed Pass'}
+                {lookupResult.checkedIn ? (
+                  <span className="inline-flex items-center gap-1">
+                    <Check className="h-3 w-3" />
+                    <span>Checked In</span>
+                  </span>
+                ) : lookupResult.status === 'Waitlisted' ? (
+                  `Waitlist #${lookupResult.waitlistPosition}`
+                ) : (
+                  'Confirmed Pass'
+                )}
               </span>
             </div>
 
@@ -180,8 +186,9 @@ export default function TicketVerifierModal({ onClose, onCheckInComplete }) {
               <p><strong>Event:</strong> {lookupResult.event?.title || '—'}</p>
               <p><strong>Venue & Time:</strong> {lookupResult.event?.venue} · {lookupResult.event?.time}</p>
               {lookupResult.checkedIn && lookupResult.checkedInAt && (
-                <p className="text-[#356548] font-bold pt-1">
-                  ✓ Checked in at: {new Date(lookupResult.checkedInAt).toLocaleString()}
+                <p className="text-[#356548] font-bold pt-1 flex items-center gap-1.5">
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  <span>Checked in at: {new Date(lookupResult.checkedInAt).toLocaleString()}</span>
                 </p>
               )}
             </div>
@@ -204,7 +211,14 @@ export default function TicketVerifierModal({ onClose, onCheckInComplete }) {
                   disabled={loading}
                   className="rounded-xl bg-[#356548] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#2b533b] transition"
                 >
-                  {loading ? 'Confirming…' : 'Confirm Check-in ✓'}
+                  {loading ? (
+                    'Confirming…'
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5">
+                      <span>Confirm Check-in</span>
+                      <Check className="h-3.5 w-3.5" />
+                    </span>
+                  )}
                 </button>
               ) : (
                 <span className="text-xs text-[#875B18] font-semibold">

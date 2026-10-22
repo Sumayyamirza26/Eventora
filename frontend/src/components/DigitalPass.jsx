@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
+import { Calendar, Check, Clock, MapPin, Printer, X } from 'lucide-react';
 import { formatDate } from '../utils.js';
 
 export default function DigitalPass({ registration, event, onClose }) {
@@ -65,8 +66,8 @@ export default function DigitalPass({ registration, event, onClose }) {
 
           <div className="flex items-center justify-between relative z-10">
             <div className="flex items-center gap-2">
-              <span className="grid h-8 w-8 place-items-center rounded-xl bg-[#D6E59A] text-[#292331] text-sm font-black">
-                E
+              <span className="grid h-8 w-8 overflow-hidden place-items-center rounded-xl bg-[#292331] p-1 shadow-xs border border-white/10">
+                <img src="/eventora-icon.png" alt="Eventora" className="h-full w-full object-contain rounded-lg" />
               </span>
               <span className="font-bold text-sm tracking-tight text-[#E7E2E9]">
                 EVENTORA DIGITAL PASS
@@ -75,7 +76,7 @@ export default function DigitalPass({ registration, event, onClose }) {
 
             <div className="flex items-center gap-2">
               <span
-                className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold ${
                   isCheckedIn
                     ? 'bg-[#356548] text-white'
                     : isWaitlisted
@@ -83,11 +84,19 @@ export default function DigitalPass({ registration, event, onClose }) {
                     : 'bg-[#D6E59A] text-[#292331]'
                 }`}
               >
-                {isCheckedIn
-                  ? '✓ Checked In'
-                  : isWaitlisted
-                  ? `Waitlist #${registration.waitlistPosition}`
-                  : '✓ Confirmed'}
+                {isCheckedIn ? (
+                  <>
+                    <Check className="h-3 w-3" />
+                    <span>Checked In</span>
+                  </>
+                ) : isWaitlisted ? (
+                  `Waitlist #${registration.waitlistPosition}`
+                ) : (
+                  <>
+                    <Check className="h-3 w-3" />
+                    <span>Confirmed</span>
+                  </>
+                )}
               </span>
 
               {onClose && (
@@ -97,7 +106,7 @@ export default function DigitalPass({ registration, event, onClose }) {
                   className="grid h-7 w-7 place-items-center rounded-full bg-white/20 text-xs font-bold text-white hover:bg-white/30 transition print:hidden"
                   aria-label="Close pass"
                 >
-                  ✕
+                  <X className="h-3.5 w-3.5" />
                 </button>
               )}
             </div>
@@ -108,9 +117,18 @@ export default function DigitalPass({ registration, event, onClose }) {
           </h3>
 
           <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-[#E7E2E9]/90">
-            <span>📅 {formatDate(targetEvent.date)}</span>
-            <span>🕒 {targetEvent.time}</span>
-            <span>📍 {targetEvent.venue}</span>
+            <span className="inline-flex items-center gap-1">
+              <Calendar className="h-3.5 w-3.5" />
+              <span>{formatDate(targetEvent.date)}</span>
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5" />
+              <span>{targetEvent.time}</span>
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <MapPin className="h-3.5 w-3.5" />
+              <span>{targetEvent.venue}</span>
+            </span>
           </div>
         </div>
 
@@ -201,14 +219,19 @@ export default function DigitalPass({ registration, event, onClose }) {
             <div className="flex justify-between pt-0.5">
               <span className="text-[#625078]">Entry Status</span>
               <span className={`font-semibold ${isCheckedIn ? 'text-[#356548]' : 'text-[#625078]'}`}>
-                {isCheckedIn
-                  ? `Checked in at ${new Date(registration.checkedInAt).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}`
-                  : isWaitlisted
-                  ? 'Pending seat release'
-                  : '✓ Valid — Present at entrance'}
+                {isCheckedIn ? (
+                  `Checked in at ${new Date(registration.checkedInAt).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}`
+                ) : isWaitlisted ? (
+                  'Pending seat release'
+                ) : (
+                  <span className="inline-flex items-center gap-1">
+                    <Check className="h-3.5 w-3.5 text-[#356548]" />
+                    <span>Valid — Present at entrance</span>
+                  </span>
+                )}
               </span>
             </div>
           </div>
@@ -223,8 +246,9 @@ export default function DigitalPass({ registration, event, onClose }) {
 
           {/* Actions */}
           <div className="mt-5 flex items-center justify-center gap-3 print:hidden">
-            <button type="button" onClick={handlePrint} className="btn-ghost text-xs !py-2">
-              🖨️ Print Pass
+            <button type="button" onClick={handlePrint} className="btn-ghost inline-flex items-center gap-1.5 text-xs !py-2">
+              <Printer className="h-3.5 w-3.5" />
+              <span>Print Pass</span>
             </button>
             {onClose && (
               <button

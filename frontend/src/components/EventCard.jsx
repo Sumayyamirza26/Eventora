@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Bookmark, Clock, MapPin, Sparkles, Target } from 'lucide-react';
 import { formatDate, categoryColors } from '../utils.js';
 
 export default function EventCard({
@@ -56,7 +57,8 @@ export default function EventCard({
 
           {isRecommended && (
             <span className="inline-flex items-center gap-1 rounded-full bg-[#D6E59A] px-2.5 py-0.5 text-[10px] font-bold text-[#292331] shadow-md backdrop-blur">
-              <span>✦</span> For You
+              <Sparkles className="h-3 w-3" />
+              <span>For You</span>
             </span>
           )}
 
@@ -121,13 +123,18 @@ export default function EventCard({
         <h3 className="text-lg font-bold leading-snug text-[#292331] group-hover:text-[#625078] transition line-clamp-1">
           {event.title}
         </h3>
-        <p className="mt-1 text-xs font-medium text-[#625078]">
-          🕒 {event.time} &nbsp;·&nbsp; 📍 {event.venue}
+        <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs font-medium text-[#625078]">
+          <Clock className="h-3.5 w-3.5 inline shrink-0" />
+          <span>{event.time}</span>
+          <span>·</span>
+          <MapPin className="h-3.5 w-3.5 inline shrink-0" />
+          <span>{event.venue}</span>
         </p>
 
         {isRecommended && matchReason && (
-          <p className="mt-1 text-[11px] font-semibold text-[#625078]">
-            🎯 {matchReason}
+          <p className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-[#625078]">
+            <Target className="h-3 w-3 inline shrink-0" />
+            <span>{matchReason}</span>
           </p>
         )}
 

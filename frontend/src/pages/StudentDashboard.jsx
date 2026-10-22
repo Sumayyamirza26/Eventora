@@ -1,5 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Award,
+  Bell,
+  Calendar,
+  Check,
+  Clock,
+  Download,
+  Eye,
+  MapPin,
+  Megaphone,
+  Pencil,
+  Ticket,
+} from 'lucide-react';
 import { api, studentStorage } from '../api.js';
 import { formatDate, categoryColors } from '../utils.js';
 import { useToast } from '../components/Toast.jsx';
@@ -176,7 +189,8 @@ export default function StudentDashboard() {
               onClick={() => setShowProfileModal(true)}
               className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-white/20"
             >
-              <span>✏️ Edit Profile</span>
+              <Pencil className="h-3.5 w-3.5" />
+              <span>Edit Profile</span>
             </button>
             <button
               type="button"
@@ -218,37 +232,40 @@ export default function StudentDashboard() {
           <button
             type="button"
             onClick={() => setActiveTab('events')}
-            className={`rounded-xl px-4 py-2 text-xs font-bold transition ${
+            className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition ${
               activeTab === 'events'
                 ? 'bg-[#292331] text-white shadow-sm'
                 : 'text-[#625078] hover:bg-[#F7F5F0] hover:text-[#292331]'
             }`}
           >
-            🎟️ My Registered Events ({registrations.length})
+            <Ticket className="h-3.5 w-3.5" />
+            <span>My Registered Events ({registrations.length})</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('certificates')}
-            className={`rounded-xl px-4 py-2 text-xs font-bold transition ${
+            className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition ${
               activeTab === 'certificates'
                 ? 'bg-[#292331] text-white shadow-sm'
                 : 'text-[#625078] hover:bg-[#F7F5F0] hover:text-[#292331]'
             }`}
           >
-            🎓 My Certificates ({certificates.length})
+            <Award className="h-3.5 w-3.5" />
+            <span>My Certificates ({certificates.length})</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('notifications')}
-            className={`relative rounded-xl px-4 py-2 text-xs font-bold transition ${
+            className={`relative inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition ${
               activeTab === 'notifications'
                 ? 'bg-[#292331] text-white shadow-sm'
                 : 'text-[#625078] hover:bg-[#F7F5F0] hover:text-[#292331]'
             }`}
           >
-            <span>🔔 Notifications</span>
+            <Bell className="h-3.5 w-3.5" />
+            <span>Notifications</span>
             {unreadCount > 0 && (
               <span className="ml-1.5 rounded-full bg-[#A34235] px-1.5 py-0.2 text-[10px] font-bold text-white">
                 {unreadCount}
@@ -308,7 +325,9 @@ export default function StudentDashboard() {
             </div>
           ) : filteredRegistrations.length === 0 ? (
             <div className="rounded-3xl border border-[#E7E2E9] bg-white p-12 text-center text-[#625078]">
-              <span className="text-4xl">🎫</span>
+              <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#F7F5F0] border border-[#E7E2E9] text-[#625078]">
+                <Ticket className="h-7 w-7 text-[#625078]" />
+              </div>
               <h3 className="mt-3 font-bold text-base text-[#292331]">No registered events found</h3>
               <p className="mt-1 text-xs">
                 {searchQuery || statusFilter !== 'All'
@@ -373,8 +392,9 @@ export default function StudentDashboard() {
 
                         {/* Registration Status Badges */}
                         {isCheckedIn ? (
-                          <span className="rounded-full bg-[#356548] px-2.5 py-0.5 text-xs font-bold text-white shadow-xs">
-                            ✓ Checked In
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[#356548] px-2.5 py-0.5 text-xs font-bold text-white shadow-xs">
+                            <Check className="h-3 w-3 stroke-[2.5]" />
+                            <span>Checked In</span>
                           </span>
                         ) : isWaitlisted ? (
                           <span className="rounded-full bg-[#875B18]/15 text-[#875B18] px-2.5 py-0.5 text-xs font-bold border border-[#875B18]/30">
@@ -391,8 +411,15 @@ export default function StudentDashboard() {
                         )}
                       </div>
 
-                      <p className="mt-1.5 text-xs text-[#625078]">
-                        📅 {formatDate(event.date)} · 🕒 {event.time} · 📍 {event.venue}
+                      <p className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-[#625078]">
+                        <Calendar className="h-3.5 w-3.5 inline shrink-0" />
+                        <span>{formatDate(event.date)}</span>
+                        <span>·</span>
+                        <Clock className="h-3.5 w-3.5 inline shrink-0" />
+                        <span>{event.time}</span>
+                        <span>·</span>
+                        <MapPin className="h-3.5 w-3.5 inline shrink-0" />
+                        <span>{event.venue}</span>
                       </p>
 
                       <div className="mt-2.5 flex flex-wrap items-center gap-3 font-mono text-xs text-[#292331]">
@@ -418,16 +445,18 @@ export default function StudentDashboard() {
                           onClick={() => setSelectedPass(reg)}
                           className="inline-flex items-center gap-1.5 rounded-xl bg-[#292331] px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#3d3349] transition"
                         >
-                          <span>🎟️ Digital Pass</span>
+                          <Ticket className="h-3.5 w-3.5" />
+                          <span>Digital Pass</span>
                         </button>
                       )}
 
                       <button
                         type="button"
                         onClick={() => setShowCommsEvent(event)}
-                        className="btn-ghost !px-3 !py-2 text-xs"
+                        className="btn-ghost !px-3 !py-2 text-xs inline-flex items-center gap-1.5"
                       >
-                        📢 Updates
+                        <Megaphone className="h-3.5 w-3.5" />
+                        <span>Updates</span>
                       </button>
 
                       {!isCancelled && (
@@ -468,7 +497,9 @@ export default function StudentDashboard() {
             </div>
           ) : certificates.length === 0 ? (
             <div className="rounded-3xl border border-[#E7E2E9] bg-white p-12 text-center text-[#625078]">
-              <span className="text-4xl">🎓</span>
+              <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#F7F5F0] border border-[#E7E2E9] text-[#625078]">
+                <Award className="h-7 w-7 text-[#625078]" />
+              </div>
               <h3 className="mt-3 font-bold text-base text-[#292331]">No certificates available yet</h3>
               <p className="mt-1 text-xs">
                 Certificates are generated once registered campus events conclude or upon event check-in!
@@ -482,8 +513,9 @@ export default function StudentDashboard() {
                   className="rounded-3xl border border-[#E7E2E9] bg-white p-6 shadow-sm hover:shadow-md transition"
                 >
                   <div className="flex items-start justify-between">
-                    <span className="rounded-full bg-[#D6E59A] px-2.5 py-0.5 text-[10px] font-bold text-[#292331] uppercase tracking-wider">
-                      ★ Verified Certificate
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#D6E59A] px-2.5 py-0.5 text-[10px] font-bold text-[#292331] uppercase tracking-wider">
+                      <Award className="h-3 w-3" />
+                      <span>Verified Certificate</span>
                     </span>
                     <span className="font-mono text-[10px] text-[#625078]">{cert.certificateId}</span>
                   </div>
@@ -492,8 +524,12 @@ export default function StudentDashboard() {
                     {cert.event?.title}
                   </h3>
 
-                  <p className="mt-1 text-xs text-[#625078]">
-                    📅 {formatDate(cert.event?.date)} · 📍 {cert.event?.venue}
+                  <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-[#625078]">
+                    <Calendar className="h-3.5 w-3.5 inline shrink-0" />
+                    <span>{formatDate(cert.event?.date)}</span>
+                    <span>·</span>
+                    <MapPin className="h-3.5 w-3.5 inline shrink-0" />
+                    <span>{cert.event?.venue}</span>
                   </p>
 
                   <div className="mt-4 rounded-xl border border-[#E7E2E9] bg-[#F7F5F0] p-3 text-xs">
@@ -511,9 +547,10 @@ export default function StudentDashboard() {
                     <button
                       type="button"
                       onClick={() => setSelectedCert(cert)}
-                      className="btn-ghost text-xs !py-2 !px-3"
+                      className="btn-ghost text-xs !py-2 !px-3 inline-flex items-center gap-1.5"
                     >
-                      👁️ Preview
+                      <Eye className="h-3.5 w-3.5" />
+                      <span>Preview</span>
                     </button>
                     <button
                       type="button"
@@ -522,7 +559,8 @@ export default function StudentDashboard() {
                       }}
                       className="inline-flex items-center gap-1.5 rounded-xl bg-[#292331] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#3d3349] transition"
                     >
-                      <span>📥 Download PDF</span>
+                      <Download className="h-3.5 w-3.5" />
+                      <span>Download PDF</span>
                     </button>
                   </div>
                 </div>

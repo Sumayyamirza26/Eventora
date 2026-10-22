@@ -1,3 +1,4 @@
+import { Award, X, Download } from 'lucide-react';
 import { downloadCertificatePDF } from '../utils/generateCertificate.js';
 import { formatDate } from '../utils.js';
 import { useToast } from './Toast.jsx';
@@ -39,7 +40,7 @@ export default function CertificateModal({ certificate, onClose }) {
         <div className="flex items-center justify-between border-b border-[#E7E2E9] bg-[#292331] px-6 py-4 text-white">
           <div className="flex items-center gap-2">
             <span className="grid h-8 w-8 place-items-center rounded-xl bg-[#D6E59A] text-xs font-black text-[#292331]">
-              ★
+              <Award className="h-4 w-4 text-[#292331]" />
             </span>
             <div>
               <h3 className="font-bold text-sm tracking-wide text-white">Official Participation Certificate</h3>
@@ -49,9 +50,10 @@ export default function CertificateModal({ certificate, onClose }) {
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close"
             className="grid h-7 w-7 place-items-center rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition"
           >
-            ✕
+            <X className="h-4 w-4" />
           </button>
         </div>
 
@@ -128,7 +130,8 @@ export default function CertificateModal({ certificate, onClose }) {
               onClick={handleDownload}
               className="inline-flex items-center gap-2 rounded-xl bg-[#292331] px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#3d3349] transition"
             >
-              <span>📥 Download PDF Certificate</span>
+              <Download className="h-4 w-4" />
+              <span>Download PDF Certificate</span>
             </button>
           </div>
         </div>

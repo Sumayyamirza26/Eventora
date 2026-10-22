@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { X } from 'lucide-react';
 import { api } from '../api.js';
 import { YEARS } from '../utils.js';
 import { useToast } from './Toast.jsx';
@@ -60,9 +61,10 @@ export default function StudentProfileModal({ student, onClose, onUpdated }) {
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close dialog"
             className="grid h-7 w-7 place-items-center rounded-lg text-slate-400 hover:bg-[#F7F5F0] hover:text-[#292331] transition"
           >
-            ✕
+            <X className="h-4 w-4" />
           </button>
         </div>
 

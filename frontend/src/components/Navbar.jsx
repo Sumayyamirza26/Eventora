@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { GraduationCap } from 'lucide-react';
 import { api, studentStorage } from '../api.js';
 
 const linkClass = ({ isActive }) =>
@@ -39,12 +40,13 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-30 border-b border-[#E7E2E9] bg-white/95 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-        <NavLink to="/" className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-[#292331]">
-          <span className="relative grid h-9 w-9 place-items-center rounded-xl bg-[#292331] text-white font-extrabold shadow-sm">
-            E
-            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#D6E59A] ring-2 ring-white" />
-          </span>
-          <span className="text-[#292331]">Eventora</span>
+        <NavLink to="/" className="flex items-center transition hover:opacity-90">
+          <img
+            src="/eventora-logo.png"
+            alt="Eventora"
+            className="h-8 sm:h-9 w-auto rounded-xl object-contain shadow-xs"
+          />
+          <span className="sr-only">Eventora</span>
         </NavLink>
 
         <nav className="flex items-center gap-1.5 sm:gap-2">
@@ -56,7 +58,8 @@ export default function Navbar() {
           {isStudent ? (
             <NavLink to="/dashboard" className={linkClass}>
               <span className="flex items-center gap-1.5">
-                <span>🎓 My Dashboard</span>
+                <GraduationCap className="h-4 w-4" />
+                <span>My Dashboard</span>
               </span>
             </NavLink>
           ) : (

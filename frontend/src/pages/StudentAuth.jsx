@@ -86,8 +86,8 @@ export default function StudentAuth() {
       <div className="w-full max-w-md animate-pop">
         {/* Brand Header */}
         <div className="text-center">
-          <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-[#292331] text-white font-black text-xl shadow-md">
-            E
+          <div className="mx-auto h-14 w-14 overflow-hidden rounded-2xl bg-[#292331] p-1.5 shadow-md">
+            <img src="/eventora-icon.png" alt="Eventora" className="h-full w-full object-contain rounded-xl" />
           </div>
           <h1 className="mt-4 text-2xl font-black tracking-tight text-[#292331]">
             {isLogin ? 'Student Portal Login' : 'Create Student Account'}

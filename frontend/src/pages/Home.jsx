@@ -1,5 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  Calendar,
+  GraduationCap,
+  Megaphone,
+  Search,
+  Settings2,
+  Sparkles,
+  Star,
+  Target,
+  Ticket,
+  X,
+} from 'lucide-react';
 import { api, studentStorage } from '../api.js';
 import { CATEGORIES } from '../utils.js';
 import EventCard from '../components/EventCard.jsx';
@@ -145,10 +157,28 @@ export default function Home() {
     <>
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-[#292331] text-white">
+        {/* Responsive Hero Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url('/hero-bg.jpg')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Subtle Dark Purple Overlay for text readability & brand cohesion */}
+        <div
+          className="absolute inset-0 bg-[#292331]/80 backdrop-brightness-90"
+          aria-hidden="true"
+        />
+
+        {/* Ambient Glows */}
         <div className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-[#625078]/25 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 right-0 h-96 w-96 rounded-full bg-[#D6E59A]/10 blur-3xl pointer-events-none" />
 
-        <div className="relative mx-auto max-w-6xl px-4 py-20 text-center sm:py-28 sm:px-6">
+        <div className="relative z-10 mx-auto max-w-6xl px-4 py-20 text-center sm:py-28 sm:px-6">
           <div className="inline-flex items-center gap-2 rounded-full border border-[#E7E2E9]/20 bg-white/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-white backdrop-blur-md">
             <span className="h-2 w-2 rounded-full bg-[#D6E59A]" />
             Curated College Events &amp; QR Digital Passes
@@ -177,7 +207,8 @@ export default function Home() {
               to={studentStorage.isAuthenticated() ? '/dashboard' : '/student/login'}
               className="inline-flex items-center gap-2 rounded-xl bg-[#D6E59A] px-5 py-3 font-bold text-[#292331] shadow-lg transition hover:bg-[#c9da88] hover:-translate-y-0.5 active:translate-y-0"
             >
-              <span>🎓 {studentStorage.isAuthenticated() ? 'My Student Dashboard' : 'Student Portal'}</span>
+              <GraduationCap className="h-4 w-4" />
+              <span>{studentStorage.isAuthenticated() ? 'My Student Dashboard' : 'Student Portal'}</span>
             </Link>
 
             <button
@@ -185,7 +216,8 @@ export default function Home() {
               onClick={() => setTicketLookupOpen(true)}
               className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3 font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
             >
-              <span>🎟️ Lookup Pass</span>
+              <Ticket className="h-4 w-4" />
+              <span>Lookup Pass</span>
             </button>
 
             <button
@@ -193,7 +225,8 @@ export default function Home() {
               onClick={() => setShowCommunication(true)}
               className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3 font-semibold text-[#E7E2E9] backdrop-blur-md transition hover:bg-white/20"
             >
-              <span>📢 Campus Notices</span>
+              <Megaphone className="h-4 w-4" />
+              <span>Campus Notices</span>
             </button>
           </div>
 
@@ -239,12 +272,13 @@ export default function Home() {
               className="inline-flex items-center gap-1.5 rounded-xl border border-[#E7E2E9] bg-white px-3 py-1.5 text-xs font-bold text-[#625078] hover:text-[#292331] hover:border-[#625078]/40 shadow-xs transition"
               title="Personalize recommended events"
             >
-              <span>⚙️ My Interests</span>
+              <Settings2 className="h-3.5 w-3.5" />
+              <span>My Interests</span>
               {hasPreferences && (
                 <span className="h-2 w-2 rounded-full bg-[#356548]" />
               )}
             </button>
-
+ 
             {!loading && !error && (
               <span className="text-xs font-semibold text-[#625078]">
                 Showing <strong className="text-[#292331]">{filteredEvents.length}</strong> of {events.length} events
@@ -258,9 +292,7 @@ export default function Home() {
           {/* Search Input Container */}
           <div className="relative w-full">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-[#625078]">
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <Search className="h-5 w-5" />
             </div>
 
             <input
@@ -278,7 +310,7 @@ export default function Home() {
                 aria-label="Clear search text"
                 className="absolute inset-y-0 right-0 flex items-center pr-4 text-[#625078] hover:text-[#292331]"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
             )}
           </div>
@@ -300,7 +332,7 @@ export default function Home() {
                 All Categories
               </button>
 
-              {/* "🎯 Recommended For You" Pill (Personalized Event Discovery) */}
+              {/* "For You" Pill (Personalized Event Discovery) */}
               <button
                 type="button"
                 onClick={() => {
@@ -315,7 +347,8 @@ export default function Home() {
                     : 'border-[#E7E2E9] bg-white text-[#292331] hover:bg-[#F7F5F0]'
                 }`}
               >
-                <span>🎯 For You</span>
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>For You</span>
                 {activeInterests.length > 0 && (
                   <span className="rounded-full bg-[#D6E59A] text-[#292331] px-1.5 py-0.2 text-[10px] font-bold">
                     {activeInterests.length}
@@ -380,10 +413,10 @@ export default function Home() {
               <button
                 type="button"
                 onClick={clearFilters}
-                className="inline-flex items-center gap-1 rounded-xl border border-[#E7E2E9] bg-white px-3 py-1.5 text-xs font-medium text-[#625078] transition hover:bg-[#F7F5F0] hover:text-[#292331]"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-[#E7E2E9] bg-white px-3 py-1.5 text-xs font-medium text-[#625078] transition hover:bg-[#F7F5F0] hover:text-[#292331]"
               >
                 <span>Clear filters</span>
-                <span className="text-slate-400">✕</span>
+                <X className="h-3 w-3 text-slate-400" />
               </button>
             )}
           </div>
@@ -431,7 +464,9 @@ export default function Home() {
         {/* Empty State: No events exist */}
         {!loading && !error && events.length === 0 && (
           <div className="rounded-2xl border border-[#E7E2E9] bg-white p-12 text-center shadow-sm">
-            <span className="text-4xl">🗓️</span>
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#F7F5F0] border border-[#E7E2E9] text-[#625078]">
+              <Calendar className="h-7 w-7 text-[#625078]" />
+            </div>
             <h3 className="mt-4 text-lg font-bold text-[#292331]">No upcoming events right now</h3>
             <p className="mt-1 text-sm text-[#625078]">
               Check back soon for new hackathons, workshops, and campus meetups.
@@ -444,8 +479,8 @@ export default function Home() {
           <div className="rounded-2xl border border-[#E7E2E9] bg-white p-12 text-center shadow-sm max-w-lg mx-auto animate-fade-up">
             {selectedCategory === 'ForYou' ? (
               <>
-                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#F7F5F0] text-2xl text-[#625078] border border-[#E7E2E9]">
-                  🎯
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#F7F5F0] text-[#625078] border border-[#E7E2E9]">
+                  <Target className="h-7 w-7 text-[#625078]" />
                 </div>
                 <h3 className="mt-4 text-lg font-bold text-[#292331]">No personalized matches found</h3>
                 <p className="mt-1.5 text-sm text-[#625078] leading-relaxed">
@@ -470,8 +505,8 @@ export default function Home() {
               </>
             ) : selectedCategory === 'Favourites' ? (
               <>
-                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#F7F5F0] text-2xl text-[#625078] border border-[#E7E2E9]">
-                  ⭐
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#F7F5F0] text-[#625078] border border-[#E7E2E9]">
+                  <Star className="h-7 w-7 text-[#625078]" />
                 </div>
                 <h3 className="mt-4 text-lg font-bold text-[#292331]">No favourite events yet</h3>
                 <p className="mt-1.5 text-sm text-[#625078] leading-relaxed">
@@ -487,8 +522,8 @@ export default function Home() {
               </>
             ) : (
               <>
-                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#F7F5F0] text-2xl text-[#625078] border border-[#E7E2E9]">
-                  🔍
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#F7F5F0] text-[#625078] border border-[#E7E2E9]">
+                  <Search className="h-7 w-7 text-[#625078]" />
                 </div>
                 <h3 className="mt-4 text-lg font-bold text-[#292331]">No matching events found</h3>
                 <p className="mt-1.5 text-sm text-[#625078] leading-relaxed">
@@ -574,9 +609,10 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setTicketLookupOpen(false)}
+                aria-label="Close dialog"
                 className="text-slate-400 hover:text-[#292331]"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
             </div>
 

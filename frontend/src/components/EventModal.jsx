@@ -1,5 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  AlertTriangle,
+  Ban,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  GraduationCap,
+  Hourglass,
+  MapPin,
+  Megaphone,
+  Ticket,
+  User,
+  X,
+} from 'lucide-react';
 import { api, studentStorage } from '../api.js';
 import { YEARS, formatDate, categoryColors } from '../utils.js';
 import { useToast } from './Toast.jsx';
@@ -182,7 +196,8 @@ export default function EventModal({ event, onClose, onRegistered, isFav, onTogg
                 title="Event Communication Centre"
                 className="flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-[#292331] shadow-md hover:bg-white transition"
               >
-                <span>📢 Updates</span>
+                <Megaphone className="h-3.5 w-3.5" />
+                <span>Updates</span>
               </button>
 
               {onToggleFav && (
@@ -217,7 +232,7 @@ export default function EventModal({ event, onClose, onRegistered, isFav, onTogg
                 aria-label="Close dialog"
                 className="grid h-9 w-9 place-items-center rounded-full bg-white/90 text-sm font-bold text-[#292331] transition hover:bg-white shadow-md"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
             </div>
 
@@ -254,7 +269,10 @@ export default function EventModal({ event, onClose, onRegistered, isFav, onTogg
           <div className="p-6 sm:p-8">
             {isCancelled && (
               <div className="mb-6 rounded-2xl border border-[#A34235]/40 bg-[#A34235]/10 p-4 text-xs text-[#A34235]">
-                <strong className="block text-sm font-bold">⚠️ Notice: This Event Has Been Cancelled</strong>
+                <strong className="flex items-center gap-1.5 text-sm font-bold">
+                  <AlertTriangle className="h-4 w-4 shrink-0" />
+                  <span>Notice: This Event Has Been Cancelled</span>
+                </strong>
                 <p className="mt-1">{event.cancellationReason || 'This event was cancelled by event administrators. Registrations are closed.'}</p>
               </div>
             )}
@@ -264,8 +282,8 @@ export default function EventModal({ event, onClose, onRegistered, isFav, onTogg
               <div className="animate-pop mx-auto max-w-2xl text-center py-2">
                 {confirmationData.registration.status === 'Waitlisted' ? (
                   <>
-                    <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-[#875B18]/15 text-[#875B18] ring-4 ring-[#875B18]/10 text-2xl font-bold">
-                      ⏳
+                    <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-[#875B18]/15 text-[#875B18] ring-4 ring-[#875B18]/10">
+                      <Hourglass className="h-8 w-8 text-[#875B18]" />
                     </div>
                     <span className="inline-block rounded-full bg-[#875B18]/15 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#875B18]">
                       Added to Waitlist (#{confirmationData.registration.waitlistPosition})
@@ -327,19 +345,31 @@ export default function EventModal({ event, onClose, onRegistered, isFav, onTogg
                     </div>
                     <div>
                       <span className="text-xs font-semibold text-[#625078] block">Date &amp; Time</span>
-                      <span className="font-medium">📅 {formatDate(event.date)} at {event.time}</span>
+                      <span className="font-medium flex items-center gap-1.5 mt-0.5">
+                        <Calendar className="h-3.5 w-3.5 text-[#625078] shrink-0" />
+                        <span>{formatDate(event.date)} at {event.time}</span>
+                      </span>
                     </div>
                     <div>
                       <span className="text-xs font-semibold text-[#625078] block">Venue</span>
-                      <span className="font-medium">📍 {event.venue}</span>
+                      <span className="font-medium flex items-center gap-1.5 mt-0.5">
+                        <MapPin className="h-3.5 w-3.5 text-[#625078] shrink-0" />
+                        <span>{event.venue}</span>
+                      </span>
                     </div>
                     <div>
                       <span className="text-xs font-semibold text-[#625078] block">Registered Attendee</span>
-                      <span className="font-medium">👤 {form.name}</span>
+                      <span className="font-medium flex items-center gap-1.5 mt-0.5">
+                        <User className="h-3.5 w-3.5 text-[#625078] shrink-0" />
+                        <span>{form.name}</span>
+                      </span>
                     </div>
                     <div>
                       <span className="text-xs font-semibold text-[#625078] block">Department &amp; Year</span>
-                      <span className="font-medium">🎓 {form.department} · {form.year}</span>
+                      <span className="font-medium flex items-center gap-1.5 mt-0.5">
+                        <GraduationCap className="h-3.5 w-3.5 text-[#625078] shrink-0" />
+                        <span>{form.department} · {form.year}</span>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -351,7 +381,8 @@ export default function EventModal({ event, onClose, onRegistered, isFav, onTogg
                     onClick={() => setShowPass(true)}
                     className="inline-flex items-center gap-2 rounded-xl bg-[#625078] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#504063] transition"
                   >
-                    <span>🎫 View &amp; Print QR Digital Pass</span>
+                    <Ticket className="h-4 w-4" />
+                    <span>View &amp; Print QR Digital Pass</span>
                   </button>
 
                   {studentStorage.isAuthenticated() && (
@@ -363,7 +394,8 @@ export default function EventModal({ event, onClose, onRegistered, isFav, onTogg
                       }}
                       className="inline-flex items-center gap-2 rounded-xl border border-[#292331] bg-white px-6 py-3 text-sm font-semibold text-[#292331] shadow-sm hover:bg-[#F7F5F0] transition"
                     >
-                      <span>🎓 Go to My Dashboard</span>
+                      <GraduationCap className="h-4 w-4" />
+                      <span>Go to My Dashboard</span>
                     </button>
                   )}
 
@@ -389,9 +421,10 @@ export default function EventModal({ event, onClose, onRegistered, isFav, onTogg
                       <button
                         type="button"
                         onClick={() => setShowCommunication(true)}
-                        className="text-xs font-semibold text-[#625078] hover:text-[#292331] underline flex items-center gap-1"
+                        className="text-xs font-semibold text-[#625078] hover:text-[#292331] underline flex items-center gap-1.5"
                       >
-                        <span>📢 Communication Centre</span>
+                        <Megaphone className="h-3.5 w-3.5" />
+                        <span>Communication Centre</span>
                       </button>
                     </div>
 
@@ -401,21 +434,27 @@ export default function EventModal({ event, onClose, onRegistered, isFav, onTogg
 
                     <ul className="mt-6 space-y-3.5 text-sm text-[#292331]">
                       <li className="flex items-center gap-3 rounded-xl bg-[#F7F5F0] p-3 border border-[#E7E2E9]">
-                        <span className="text-lg">📅</span>
+                        <div className="grid h-9 w-9 place-items-center rounded-lg bg-white border border-[#E7E2E9] text-[#625078]">
+                          <Calendar className="h-4 w-4" />
+                        </div>
                         <div>
                           <p className="text-xs text-[#625078] font-semibold">Event Date</p>
                           <p className="font-semibold text-[#292331]">{formatDate(event.date)}</p>
                         </div>
                       </li>
                       <li className="flex items-center gap-3 rounded-xl bg-[#F7F5F0] p-3 border border-[#E7E2E9]">
-                        <span className="text-lg">🕒</span>
+                        <div className="grid h-9 w-9 place-items-center rounded-lg bg-white border border-[#E7E2E9] text-[#625078]">
+                          <Clock className="h-4 w-4" />
+                        </div>
                         <div>
                           <p className="text-xs text-[#625078] font-semibold">Scheduled Time</p>
                           <p className="font-semibold text-[#292331]">{event.time}</p>
                         </div>
                       </li>
                       <li className="flex items-center gap-3 rounded-xl bg-[#F7F5F0] p-3 border border-[#E7E2E9]">
-                        <span className="text-lg">📍</span>
+                        <div className="grid h-9 w-9 place-items-center rounded-lg bg-white border border-[#E7E2E9] text-[#625078]">
+                          <MapPin className="h-4 w-4" />
+                        </div>
                         <div>
                           <p className="text-xs text-[#625078] font-semibold">Campus Venue</p>
                           <p className="font-semibold text-[#292331]">{event.venue}</p>
@@ -490,13 +529,17 @@ export default function EventModal({ event, onClose, onRegistered, isFav, onTogg
                 <div className="rounded-2xl border border-[#E7E2E9] p-5 sm:p-6 bg-white">
                   {isCancelled ? (
                     <div className="py-12 text-center text-[#625078]">
-                      <span className="text-3xl">🚫</span>
+                      <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-[#A34235]/10 text-[#A34235]">
+                        <Ban className="h-6 w-6" />
+                      </div>
                       <h4 className="mt-3 font-bold text-base text-[#A34235]">Registration Closed</h4>
                       <p className="text-xs mt-1">This event was cancelled. Check other campus events.</p>
                     </div>
                   ) : isCompleted ? (
                     <div className="py-12 text-center text-[#625078]">
-                      <span className="text-3xl">🏁</span>
+                      <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-[#E7E2E9]/60 text-[#292331]">
+                        <CheckCircle2 className="h-6 w-6" />
+                      </div>
                       <h4 className="mt-3 font-bold text-base text-[#292331]">Event Completed</h4>
                       <p className="text-xs mt-1">This event has already taken place.</p>
                     </div>

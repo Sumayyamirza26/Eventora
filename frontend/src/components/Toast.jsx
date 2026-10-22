@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback } from 'react';
+import { Check, AlertTriangle, AlertCircle, Info, X } from 'lucide-react';
 
 const ToastContext = createContext(null);
 
@@ -45,33 +46,21 @@ export function ToastProvider({ children }) {
           bar: 'bg-[#356548]',
           badge: 'bg-[#356548]/15 text-[#356548]',
           border: 'border-[#356548]/30',
-          icon: (
-            <svg className="h-5 w-5 text-[#356548]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-            </svg>
-          ),
+          icon: <Check className="h-4 w-4 stroke-[2.5]" />,
         };
       case 'warning':
         return {
           bar: 'bg-[#875B18]',
           badge: 'bg-[#875B18]/15 text-[#875B18]',
           border: 'border-[#875B18]/30',
-          icon: (
-            <svg className="h-5 w-5 text-[#875B18]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          ),
+          icon: <AlertTriangle className="h-4 w-4 stroke-[2.5]" />,
         };
       case 'error':
         return {
           bar: 'bg-[#A34235]',
           badge: 'bg-[#A34235]/15 text-[#A34235]',
           border: 'border-[#A34235]/30',
-          icon: (
-            <svg className="h-5 w-5 text-[#A34235]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ),
+          icon: <AlertCircle className="h-4 w-4 stroke-[2.5]" />,
         };
       case 'info':
       default:
@@ -79,11 +68,7 @@ export function ToastProvider({ children }) {
           bar: 'bg-[#485A99]',
           badge: 'bg-[#485A99]/15 text-[#485A99]',
           border: 'border-[#485A99]/30',
-          icon: (
-            <svg className="h-5 w-5 text-[#485A99]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          ),
+          icon: <Info className="h-4 w-4 stroke-[2.5]" />,
         };
     }
   };
@@ -119,7 +104,7 @@ export function ToastProvider({ children }) {
                 aria-label="Close notification"
                 className="grid h-6 w-6 place-items-center rounded-lg text-slate-400 hover:bg-[#F7F5F0] hover:text-[#292331] transition"
               >
-                ✕
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
           );

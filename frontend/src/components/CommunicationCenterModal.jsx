@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Calendar, Clock, MapPin, Megaphone, Pin, X } from 'lucide-react';
 import { api } from '../api.js';
 import { useToast } from './Toast.jsx';
 import { formatDate } from '../utils.js';
@@ -113,8 +114,15 @@ export default function CommunicationCenterModal({ event, onClose, isAdmin = fal
               {event ? event.title : 'Campus Announcements'}
             </h3>
             {event && (
-              <p className="text-xs text-[#E7E2E9]/80 mt-0.5">
-                📅 {formatDate(event.date)} · 🕒 {event.time} · 📍 {event.venue}
+              <p className="text-xs text-[#E7E2E9]/80 mt-1 flex flex-wrap items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 inline shrink-0" />
+                <span>{formatDate(event.date)}</span>
+                <span>·</span>
+                <Clock className="h-3.5 w-3.5 inline shrink-0" />
+                <span>{event.time}</span>
+                <span>·</span>
+                <MapPin className="h-3.5 w-3.5 inline shrink-0" />
+                <span>{event.venue}</span>
               </p>
             )}
           </div>
@@ -135,7 +143,7 @@ export default function CommunicationCenterModal({ event, onClose, isAdmin = fal
               className="grid h-8 w-8 place-items-center rounded-xl bg-white/10 text-white hover:bg-white/20 transition"
               aria-label="Close modal"
             >
-              ✕
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -246,7 +254,9 @@ export default function CommunicationCenterModal({ event, onClose, isAdmin = fal
             </div>
           ) : announcements.length === 0 ? (
             <div className="py-12 text-center text-[#625078]">
-              <span className="text-3xl">📢</span>
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-[#E7E2E9]/50 text-[#625078]">
+                <Megaphone className="h-6 w-6" />
+              </div>
               <p className="mt-3 font-semibold text-[#292331]">No announcements yet</p>
               <p className="text-xs mt-1">
                 Important updates, schedule modifications, and venue notices will appear here.
@@ -269,8 +279,9 @@ export default function CommunicationCenterModal({ event, onClose, isAdmin = fal
                         {item.type}
                       </span>
                       {item.pinned && (
-                        <span className="rounded-full bg-[#D6E59A] text-[#292331] px-2 py-0.5 text-[10px] font-bold">
-                          📌 Pinned
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[#D6E59A] text-[#292331] px-2 py-0.5 text-[10px] font-bold">
+                          <Pin className="h-3 w-3" />
+                          <span>Pinned</span>
                         </span>
                       )}
                     </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Calendar, Clock, MapPin, X } from 'lucide-react';
 import { api } from '../api.js';
 import { formatDate } from '../utils.js';
 
@@ -42,9 +43,10 @@ export default function EventStatsModal({ eventId, onClose }) {
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close dialog"
             className="grid h-8 w-8 place-items-center rounded-xl text-slate-400 hover:bg-[#F7F5F0] hover:text-[#292331] transition"
           >
-            ✕
+            <X className="h-4 w-4" />
           </button>
         </div>
 
@@ -75,8 +77,15 @@ export default function EventStatsModal({ eventId, onClose }) {
                   Status: {stats.event.status}
                 </span>
               </div>
-              <p className="mt-1 text-[#625078]">
-                📅 {formatDate(stats.event.date)} · 🕒 {stats.event.time} · 📍 {stats.event.venue}
+              <p className="mt-1 flex flex-wrap items-center gap-1.5 text-[#625078]">
+                <Calendar className="h-3.5 w-3.5 inline shrink-0" />
+                <span>{formatDate(stats.event.date)}</span>
+                <span>·</span>
+                <Clock className="h-3.5 w-3.5 inline shrink-0" />
+                <span>{stats.event.time}</span>
+                <span>·</span>
+                <MapPin className="h-3.5 w-3.5 inline shrink-0" />
+                <span>{stats.event.venue}</span>
               </p>
             </div>
 
